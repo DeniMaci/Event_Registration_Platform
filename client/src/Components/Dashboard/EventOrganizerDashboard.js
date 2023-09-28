@@ -3,7 +3,7 @@ import React, { Component } from "react";
 import UserService from "../../Services/UserService";
 import EventBus from "../../Shared/EventBus";
 
-export default class BoardAdmin extends Component {
+export default class BoardEventOrganizer extends Component {
   constructor(props) {
     super(props);
 
@@ -13,7 +13,7 @@ export default class BoardAdmin extends Component {
   }
 
   componentDidMount() {
-    UserService.getAdminBoard().then(
+    UserService.getEventOrganizerBoard().then(
       response => {
         this.setState({
           content: response.data

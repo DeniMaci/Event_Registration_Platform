@@ -1,48 +1,147 @@
-// App.js
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import EventList from './Components/Event/EventList';
-import EventForm from './Components/Event/EventForm';
-import EventEdit from './Components/Event/EventEdit';
-import EventDelete from './Components/Event/EventDelete';
-import UserRegistration from './Components/Event/UserRegistration';
-import AttendeeList from './Components/Event/AttendeeList';
+import React, { Component } from "react";
+import { Routes, Route, Link } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.css";
 
-import AdminDashboard from './Components/Dashboard/AdminDashboard';
+import AuthService from "./Services/AuthService";
 
-import Register from './Components/Auth/Register.js';
-import Login from './Components/Auth/Login';
+import Login from "./Components/Auth/Login";
+import Register from "./Components/Auth/Register";
+import Home from "./Components/Home";
+import Profile from "./Components/Profile";
+import BoardUser from "./Components/Dashboard/UserDashboard";
+import BoardEventOrganizer from "./Components/Dashboard/EventOrganizerDashboard";
+import BoardAdmin from "./Components/Dashboard/AdminDashboard";
 
-import UsersList from './Components/User/UsersList';
-import UserList from './Components/User/UserList';
-import UserEdit from './Components/User/UserEdit';
-import UserDelete from './Components/User/UserDelete';
+import EventBus from "./Shared/EventBus";
 
-function App() {
-  return (
-    <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/" element={ <EventList/> } />
-          <Route path="/events/create" element={ <EventForm/> } />
-          <Route path="/events/edit/:eventId" element={ <EventEdit/> } />
-          <Route path="/events/delete/:eventId" element={ <EventDelete/> } />
-          <Route path="/events/register/:eventId" element={ <UserRegistration/> } />
-          <Route path="/events/attendees/:eventId" element={ <AttendeeList/> } />
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.logOut = this.logOut.bind(this);
 
-          <Route path="auth/register" element={ <Register/> } />
-          <Route path="/login" element={ <Login/> } />
+    this.state = {
+      showEventOrganizerBoard: false,
+      showAdminBoard: false,
+      currentUser: undefined,
+    };
+  }
 
-          <Route path="/dashboard" element={ <AdminDashboard/> } />
+  componentDidMount() {
+    const user = AuthService.getCurrentUser();
 
-          <Route path="/users" element={ <UsersList/> } />
-          <Route path="/users/:userId" element={ <UserList/> } />
-          <Route path="/users/edit/:userId" element={ <UserEdit/> } />
-          <Route path="/users/delete/:userId" element={ <UserDelete/> } />
+    if (user) {
+      this.setState({
+        currentUser: user,
+        showEventOrganizerBoard: user.roles.includes("ROLE_ORGANIZER"),
+        showAdminBoard: user.roles.includes("ROLE_ADMIN"),
+      });
+    }
+    
+    EventBus.on("logout", () => {
+      this.logOut();
+    });
+  }
+
+  componentWillUnmount() {
+    EventBus.remove("logout");
+  }
+
+  logOut() {
+    AuthService.logout();
+    this.setState({
+      showEventOrganizerBoard: false,
+      showAdminBoard: false,
+      currentUser: undefined,
+    });
+  }
+
+  render() {
+    const { currentUser, showEventOrganizerBoard, showAdminBoard } = this.state;
+
+    return (
+      <div>
+        <nav className="navbar navbar-expand navbar-dark bg-dark">
+          <Link to={"/"} className="navbar-brand">
+            Event Registration Platform
+          </Link>
+          <div className="navbar-nav mr-auto">
+            <li className="nav-item">
+              <Link to={"/home"} className="nav-link">
+                Home
+              </Link>
+            </li>
+
+            {showEventOrganizerBoard && (
+              <li className="nav-item">
+                <Link to={"/eventOrganizer"} className="nav-link">
+                  Event Organizer Dashboard
+                </Link>
+              </li>
+            )}
+
+            {showAdminBoard && (
+              <li className="nav-item">
+                <Link to={"/admin"} className="nav-link">
+                  Admin Dashboard
+                </Link>
+              </li>
+            )}
+
+            {currentUser && (
+              <li className="nav-item">
+                <Link to={"/user"} className="nav-link">
+                  User Dashboard
+                </Link>
+              </li>
+            )}
+          </div>
+
+          {currentUser ? (
+            <div className="navbar-nav ml-auto">
+              <li className="nav-item">
+                <Link to={"/profile"} className="nav-link">
+                  {currentUser.username}
+                </Link>
+              </li>
+              <li className="nav-item">
+                <a href="/login" className="nav-link" onClick={this.logOut}>
+                  LogOut
+                </a>
+              </li>
+            </div>
+          ) : (
+            <div className="navbar-nav ml-auto">
+              <li className="nav-item">
+                <Link to={"/login"} className="nav-link">
+                  Login
+                </Link>
+              </li>
+
+              <li className="nav-item">
+                <Link to={"/register"} className="nav-link">
+                  Sign Up
+                </Link>
+              </li>
+            </div>
+          )}
+        </nav>
+
+        <div className="container mt-3">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/user" element={<BoardUser />} />
+            <Route path="/eventOrganizer" element={<BoardEventOrganizer />} />
+            <Route path="/admin" element={<BoardAdmin />} />
           </Routes>
+        </div>
       </div>
-    </Router>
-  );
+    );
+  }
 }
 
 export default App;

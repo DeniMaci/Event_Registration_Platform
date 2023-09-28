@@ -1,9 +1,8 @@
 import React, { Component } from "react";
 
-import UserService from "../../Services/UserService";
-import EventBus from "../../Shared/EventBus";
+import UserService from "../Services/UserService";
 
-export default class BoardAdmin extends Component {
+export default class Home extends Component {
   constructor(props) {
     super(props);
 
@@ -13,7 +12,7 @@ export default class BoardAdmin extends Component {
   }
 
   componentDidMount() {
-    UserService.getAdminBoard().then(
+    UserService.getPublicContent().then(
       response => {
         this.setState({
           content: response.data
@@ -22,16 +21,10 @@ export default class BoardAdmin extends Component {
       error => {
         this.setState({
           content:
-            (error.response &&
-              error.response.data &&
-              error.response.data.message) ||
+            (error.response && error.response.data) ||
             error.message ||
             error.toString()
         });
-
-        if (error.response && error.response.status === 401) {
-          EventBus.dispatch("logout");
-        }
       }
     );
   }

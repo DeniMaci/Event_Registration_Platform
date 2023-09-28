@@ -1,23 +1,55 @@
-const express = require('express');
-const app = express();
-const cors = require('cors');
+const express = require("express");
+const cors = require("cors");
+const dotenv = require("dotenv");
 
-app.use(express.json());
+dotenv.config()
+const app = express()
+
+var corsOptions = {
+  origin: "http://localhost:4001"
+};
+
+app.use(cors(corsOptions));
+app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
 
-// Include routes for authentication
-app.use('api/auth', require('./Routes/Auth'));
+const db = require('./Models')
+const Role = db.Role;
 
-// Include routes for user-related operations
-app.use('/users', require('./Routes/Users'));
+ db.sequelize.sync();
+// force: true will drop the table if it already exists
+// db.sequelize.sync({force: true}).then(() => {
+//    console.log('Drop and Resync Database with { force: true }');
+//    initial();
+//  });
 
-// Include routes for event-related operations
-app.use('/events', require('./Routes/Events'));
-
-// Include routes for admin-related operations
-app.use('/admin', require('./Routes/Admin'));
-
-app.listen(3000, () => {
-  console.log('Server listening on port:', 3000);
+// simple route
+app.get("/", (req, res) => {
+  res.json({ message: "Welcome to Event Registration Platform." });
 });
+
+// routes
+require('./Routes/Auth.js')(app);
+require('./Routes/User.js')(app);
+
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}.`);
+});
+
+function initial() {
+  Role.create({
+    id: 1,
+    name: "User"
+  });
+ 
+  Role.create({
+    id: 2,
+    name: "Organizer"
+  });
+ 
+  Role.create({
+    id: 3,
+    name: "Admin"
+  });
+}
