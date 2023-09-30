@@ -12,6 +12,9 @@ import Profile from "./Components/Profile";
 import BoardUser from "./Components/Dashboard/UserDashboard";
 import BoardEventOrganizer from "./Components/Dashboard/EventOrganizerDashboard";
 import BoardAdmin from "./Components/Dashboard/AdminDashboard";
+import EventList from "./Components/Event/EventList";
+import EventCreate from "./Components/Event/EventCreate";
+import EventEdit from "./Components/Event/EventEdit";
 
 import EventBus from "./Shared/EventBus";
 
@@ -95,6 +98,14 @@ class App extends Component {
                 </Link>
               </li>
             )}
+
+            {currentUser && (
+              <li className="nav-item">
+                <Link to={"/events"} className="nav-link">
+                  Events
+                </Link>
+              </li>
+            )}
           </div>
 
           {currentUser ? (
@@ -137,6 +148,9 @@ class App extends Component {
             <Route path="/user" element={<BoardUser />} />
             <Route path="/eventOrganizer" element={<BoardEventOrganizer />} />
             <Route path="/admin" element={<BoardAdmin />} />
+            <Route path="/events" element={<EventList />} />
+            <Route path="/events/create" element={<EventCreate />} />
+            <Route path="/events/edit/:id" element={<EventEdit />} />
           </Routes>
         </div>
       </div>

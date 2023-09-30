@@ -1,19 +1,31 @@
-// routes/events.js
-const express = require('express');
-const router = express.Router();
-const eventController = require('../Controllers/EventController');
-const { authenticate } = require('../Middleware/AuthenticationMiddleware');
-const { authorizeRoles } = require('../Middleware/AuthorizationMiddleware');
+const { authJwt } = require("../Middleware");
+const EventController = require("../Controllers/EventController");
 
-// Require authentication for all event routes
-router.use(authenticate);
+module.exports = function(app) {
+// Create a new event
+app.post(
+  "/api/events",
+  [authJwt.verifyToken],
+  EventController.createEvent
+);
 
-// Define routes with role-based authorization
-router.get('/events', eventController.getAllEvents);
-router.get('/events/:eventId', eventController.getEventById);
-router.post('/events', authorizeRoles('organizer', 'admin'), eventController.createEvent);
-router.put('/events/:eventId', authorizeRoles('organizer', 'admin'), eventController.updateEvent);
-router.delete('/events/:eventId', authorizeRoles('organizer', 'admin'), eventController.deleteEvent);
-router.post('/register-event/:eventId', eventController.registerForEvent);
+// Edit an event by ID
+app.put(
+  "/api/events/:id",
+  [authJwt.verifyToken],
+  EventController.editEvent
+);
 
-module.exports = router;
+// Delete an event by ID
+app.delete(
+  "/api/events/:id",
+  [authJwt.verifyToken],
+  EventController.deleteEvent
+);
+
+// Get a list of all events
+app.get("/api/events", EventController.getAllEvents);
+
+app.get("/api/events/:id", EventController.getEventById);
+
+};

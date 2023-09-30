@@ -1,0 +1,33 @@
+.event-list-container {
+    background: linear-gradient(to bottom, #007bff, #0056b3); /* Gradient background */
+    padding: 20px;
+    border-radius: 10px;
+    color: white;
+  }
+  
+  .button-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px; /* Add margin to separate the button and link */
+  }
+  
+  button {
+    background-color: #007bff;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  .edit-link {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+  }
+  

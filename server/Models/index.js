@@ -19,12 +19,27 @@ db.sequelize = sequelize;
 
 db.User = require("../Models/User")(sequelize, Sequelize);
 db.Role = require("../Models/Role")(sequelize, Sequelize);
+db.Event = require("../Models/Event")(sequelize, Sequelize);
 
 db.Role.belongsToMany(db.User, {
-  through: "user_roles"
+  through: "User_Roles"
 });
 db.User.belongsToMany(db.Role, {
-  through: "user_roles"
+  through: "User_Roles"
+});
+
+db.User.hasMany(db.Event, { foreignKey: 'organizerId' });
+db.Event.belongsTo(db.User, { foreignKey: 'organizerId' });
+
+db.Event.belongsToMany(db.User, {
+  through: "Attendees",
+  foreignKey: "eventId",
+  as: "attendees",
+});
+db.User.belongsToMany(db.Event, {
+  through: "Attendees",
+  foreignKey: "userId",
+  as: "attendedEvents",
 });
 
 db.ROLES = ["User", "Admin", "Organizer"];

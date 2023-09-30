@@ -1,40 +1,21 @@
-// models/Event.js
-const { Sequelize, DataTypes } = require('sequelize');
-
-module.exports = (sequelize) => {
-  const Event = sequelize.define('Event', {
+// Models/Event.js
+module.exports = (sequelize, Sequelize) => {
+  const Event = sequelize.define("Event", {
     eventName: {
-      type: DataTypes.STRING,
+      type: Sequelize.STRING,
       allowNull: false,
     },
     description: {
-      type: DataTypes.TEXT,
-      allowNull: false,
+      type: Sequelize.TEXT,
     },
     date: {
-      type: DataTypes.DATE,
+      type: Sequelize.DATE,
       allowNull: false,
     },
     location: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: Sequelize.STRING,
     },
   });
-
-  Event.associate = (models) => {
-    // Each event is organized by a user (one-to-many relationship)
-    Event.belongsTo(models.User, {
-      foreignKey: 'organizerId',
-      as: 'organizer',
-    });
-
-    // Each event can have multiple attendees (many-to-many relationship)
-    Event.belongsToMany(models.User, {
-      through: models.Attendee,
-      foreignKey: 'eventId',
-      as: 'attendees',
-    });
-  };
 
   return Event;
 };

@@ -1,159 +1,113 @@
-const Event = require('../Models/Event');
-const User = require('../Models/User');
-const Attendee = require('../Models/Attendee');
+const db = require("../Models");
+const Event = db.Event;
 
-const getAllEvents = async (req, res) => {
-  try {
-    const events = await Event.findAll({
-      include: [
-        {
-          model: User,
-          as: 'organizer',
-          attributes: ['id', 'username'],
-        },
-      ],
+// Create a new event
+exports.createEvent = (req, res) => {
+  // Implement validation and authorization checks here
+  const { eventName, description, date, location } = req.body;
+  const organizerId = req.userId; // Assuming you have a middleware to extract the user's ID from the token
+
+  Event.create({
+    eventName,
+    description,
+    date,
+    location,
+    organizerId,
+  })
+    .then((event) => {
+      res.status(201).json(event);
+    })
+    .catch((err) => {
+      res.status(500).json({ message: err.message });
     });
-
-    res.status(200).json(events);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to retrieve events' });
-  }
 };
 
-const getEventById = async (req, res) => {
-  try {
-    const eventId = req.params.eventId;
+// Edit an existing event by ID
+exports.editEvent = (req, res) => {
+  // Implement validation and authorization checks here
+  const eventId = req.params.id; // Assuming you receive the event ID in the request parameters
+  const { eventName, description, date, location } = req.body;
 
-    const event = await Event.findByPk(eventId, {
-      include: [
-        {
-          model: User,
-          as: 'organizer',
-          attributes: ['id', 'username'],
-        },
-        {
-          model: User,
-          as: 'attendees',
-          attributes: ['id', 'username'],
-          through: { attributes: [] }, // Exclude Attendee association attributes
-        },
-      ],
+  Event.findByPk(eventId)
+    .then((event) => {
+      if (!event) {
+        return res.status(404).json({ message: "Event not found." });
+      }
+
+      // Update event fields
+      event.eventName = eventName;
+      event.description = description;
+      event.date = date;
+      event.location = location;
+
+      // Save the updated event
+      event
+        .save()
+        .then(() => {
+          res.status(200).json(event);
+        })
+        .catch((err) => {
+          res.status(500).json({ message: err.message });
+        });
+    })
+    .catch((err) => {
+      res.status(500).json({ message: err.message });
     });
-
-    if (!event) {
-      return res.status(404).json({ error: 'Event not found' });
-    }
-
-    res.status(200).json(event);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to retrieve event' });
-  }
 };
 
-const createEvent = async (req, res) => {
-  try {
-    const { eventName, description, date, location } = req.body;
-    const organizerId = req.user.id; // Assuming you have user authentication in place
+// Delete an event by ID
+exports.deleteEvent = (req, res) => {
+  // Implement validation and authorization checks here
+  const eventId = req.params.id; // Assuming you receive the event ID in the request parameters
 
-    const event = await Event.create({
-      eventName,
-      description,
-      date,
-      location,
-      organizerId,
+  Event.findByPk(eventId)
+    .then((event) => {
+      if (!event) {
+        return res.status(404).json({ message: "Event not found." });
+      }
+
+      // Delete the event
+      event
+        .destroy()
+        .then(() => {
+          res.status(204).json(); // No content response for successful deletion
+        })
+        .catch((err) => {
+          res.status(500).json({ message: err.message });
+        });
+    })
+    .catch((err) => {
+      res.status(500).json({ message: err.message });
     });
-
-    res.status(201).json({ message: 'Event created successfully', event });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to create event' });
-  }
 };
 
-const updateEvent = async (req, res) => {
-  try {
-    const eventId = req.params.eventId;
-    const { eventName, description, date, location } = req.body;
-
-    const event = await Event.findByPk(eventId);
-
-    if (!event) {
-      return res.status(404).json({ error: 'Event not found' });
-    }
-
-    event.eventName = eventName;
-    event.description = description;
-    event.date = date;
-    event.location = location;
-
-    await event.save();
-
-    res.status(200).json({ message: 'Event updated successfully', event });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to update event' });
-  }
-};
-
-const deleteEvent = async (req, res) => {
-  try {
-    const eventId = req.params.eventId;
-
-    const event = await Event.findByPk(eventId);
-
-    if (!event) {
-      return res.status(404).json({ error: 'Event not found' });
-    }
-
-    await event.destroy();
-
-    res.status(204).json();
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to delete event' });
-  }
-};
-
-const registerForEvent = async (req, res) => {
-  try {
-    const eventId = req.params.eventId;
-    const userId = req.user.id; // Assuming you have user authentication in place
-
-    const event = await Event.findByPk(eventId);
-
-    if (!event) {
-      return res.status(404).json({ error: 'Event not found' });
-    }
-
-    // Check if the user is already registered for the event
-    const existingAttendee = await Attendee.findOne({
-      where: { eventId, userId },
+// Get a list of all events
+exports.getAllEvents = (req, res) => {
+  // Implement authorization checks here if needed
+  Event.findAll()
+    .then((events) => {
+      res.status(200).json(events);
+    })
+    .catch((err) => {
+      res.status(500).json({ message: err.message });
     });
+};
 
-    if (existingAttendee) {
-      return res.status(400).json({ error: 'User is already registered for this event' });
-    }
+// Get an event by ID
+exports.getEventById = (req, res) => {
+  const eventId = req.params.id; // Assuming you receive the event ID in the request parameters
 
-    // Create a new Attendee record to register the user for the event
-    const attendee = await Attendee.create({
-      eventId,
-      userId,
+  Event.findByPk(eventId)
+    .then((event) => {
+      if (!event) {
+        return res.status(404).json({ message: "Event not found." });
+      }
+
+      // Respond with the event data
+      res.status(200).json(event);
+    })
+    .catch((err) => {
+      res.status(500).json({ message: err.message });
     });
-
-    res.status(201).json({ message: 'User registered for the event successfully', attendee });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to register user for the event' });
-  }
 };
 
-module.exports = {
-  getAllEvents,
-  getEventById,
-  createEvent,
-  updateEvent,
-  deleteEvent,
-  registerForEvent
-};
