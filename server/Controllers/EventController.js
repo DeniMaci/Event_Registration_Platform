@@ -1,4 +1,5 @@
 const db = require("../Models");
+const { isAdmin, isEventOrganizer } = require('../Middleware/VerifyToken')
 const Event = db.Event;
 
 // Create a new event
@@ -83,7 +84,7 @@ exports.deleteEvent = (req, res) => {
 
 // Get a list of all events
 exports.getAllEvents = (req, res) => {
-  // Implement authorization checks here if needed
+  if(isAdmin || isEventOrganizer){
   Event.findAll()
     .then((events) => {
       res.status(200).json(events);
@@ -91,6 +92,7 @@ exports.getAllEvents = (req, res) => {
     .catch((err) => {
       res.status(500).json({ message: err.message });
     });
+  }
 };
 
 // Get an event by ID

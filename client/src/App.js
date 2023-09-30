@@ -1,20 +1,22 @@
 import React, { Component } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./App.css";
+import "../src/App.css";
 
 import AuthService from "./Services/AuthService";
 
 import Login from "./Components/Auth/Login";
 import Register from "./Components/Auth/Register";
-import Home from "./Components/Home";
+
 import Profile from "./Components/Profile";
-import BoardUser from "./Components/Dashboard/UserDashboard";
-import BoardEventOrganizer from "./Components/Dashboard/EventOrganizerDashboard";
-import BoardAdmin from "./Components/Dashboard/AdminDashboard";
+
 import EventList from "./Components/Event/EventList";
 import EventCreate from "./Components/Event/EventCreate";
 import EventEdit from "./Components/Event/EventEdit";
+
+import UserList from "./Components/User/UserList";
+import UserCreate from "./Components/User/UserCreate";
+import UserEdit from "./Components/User/UserEdit";
 
 import EventBus from "./Shared/EventBus";
 
@@ -40,7 +42,7 @@ class App extends Component {
         showAdminBoard: user.roles.includes("ROLE_ADMIN"),
       });
     }
-    
+
     EventBus.on("logout", () => {
       this.logOut();
     });
@@ -85,16 +87,8 @@ class App extends Component {
 
             {showAdminBoard && (
               <li className="nav-item">
-                <Link to={"/admin"} className="nav-link">
-                  Admin Dashboard
-                </Link>
-              </li>
-            )}
-
-            {currentUser && (
-              <li className="nav-item">
-                <Link to={"/user"} className="nav-link">
-                  User Dashboard
+                <Link to={"/users"} className="nav-link">
+                  Users
                 </Link>
               </li>
             )}
@@ -140,17 +134,27 @@ class App extends Component {
 
         <div className="container mt-3">
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/home" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/user" element={<BoardUser />} />
-            <Route path="/eventOrganizer" element={<BoardEventOrganizer />} />
-            <Route path="/admin" element={<BoardAdmin />} />
+            {currentUser && (
             <Route path="/events" element={<EventList />} />
+            )}
+            {(showAdminBoard || showEventOrganizerBoard) && (
             <Route path="/events/create" element={<EventCreate />} />
+            )} 
+            {(showAdminBoard || showEventOrganizerBoard) && (
             <Route path="/events/edit/:id" element={<EventEdit />} />
+            )} 
+            {showAdminBoard && (
+              <Route path="/users" element={<UserList />} />
+            )}
+            {showAdminBoard && (
+              <Route path="/users/create" element={<UserCreate />} />
+            )}
+            {showAdminBoard && (
+              <Route path="/users/edit/:id" element={<UserEdit />} />
+            )}
           </Routes>
         </div>
       </div>

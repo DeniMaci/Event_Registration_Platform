@@ -84,7 +84,6 @@ class EditEvent extends Component {
         this.setState({
           currentEvent: response.data
         });
-        console.log(response);
       })
       .catch(e => {
         console.log(e);
