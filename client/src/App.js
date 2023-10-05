@@ -38,8 +38,8 @@ class App extends Component {
     if (user) {
       this.setState({
         currentUser: user,
-        showEventOrganizerBoard: user.roles.includes("ROLE_ORGANIZER"),
-        showAdminBoard: user.roles.includes("ROLE_ADMIN"),
+        showEventOrganizerBoard: user.roleId === 2,
+        showAdminBoard: user.roleId === 3,
       });
     }
 

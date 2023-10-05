@@ -17,27 +17,10 @@ exports.createUser = (req, res) => {
     username,
     email,
     password: hashedPassword, // Store the hashed password
-    role,
+    roleId: role, // Set the roleId directly
   })
     .then((user) => {
-      if (req.body.roles) {
-        Role.findAll({
-          where: {
-            name: {
-              [Op.or]: req.body.roles,
-            },
-          },
-        }).then((roles) => {
-          user.setRoles(roles).then(() => {
-            res.status(201).json(user);
-          });
-        });
-      } else {
-        // user role = 1
-        user.setRoles([1]).then(() => {
-          res.status(201).json(user);
-        });
-      }
+      res.status(201).json(user);
     })
     .catch((err) => {
       res.status(500).json({ message: err.message });
@@ -49,7 +32,6 @@ exports.editUser = (req, res) => {
   // Implement validation and authorization checks here
   const userId = req.params.id; // Assuming you receive the user ID in the request parameters
   const { username, email, password, role } = req.body;
-
   User.findByPk(userId)
     .then((user) => {
       if (!user) {
@@ -59,8 +41,8 @@ exports.editUser = (req, res) => {
       // Update user fields
       user.username = username;
       user.email = email;
-      user.password = bcrypt.hashSync(password, 8); // You might want to hash the password here
-      user.role = role;
+      user.password = bcrypt.hashSync(password, 8); 
+      user.roleId = role; 
 
       // Save the updated user
       user

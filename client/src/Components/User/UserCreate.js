@@ -11,7 +11,8 @@ class UserCreate extends Component {
       username: '',
       email: '',
       password: '',
-      roles: ['user'], // Default role is 'user'
+      roleId: "", 
+      role: 'user', // Default role is 'user'
       successful: false,
       message: '',
     };
@@ -22,18 +23,20 @@ class UserCreate extends Component {
     this.setState({ [name]: value });
   };
 
-  handleRoleChange = (event) => {
-    const { value } = event.target;
-    // To allow multiple role selection, we'll use an array to store roles
-    this.setState((prevState) => ({
-      roles: prevState.roles.includes(value)
-        ? prevState.roles.filter((role) => role !== value)
-        : [...prevState.roles, value],
+  handleRoleChange = (e) => {
+    const roleId = e.target.value; // Get the selected roleId
+    const roleName = this.getRoleNameById(roleId);
+    this.setState(prevState => ({
+      currentUser: {
+        ...prevState.currentUser,
+        roleId: roleId, // Set the selected roleId
+        role: roleName // Include role name for display
+      }
     }));
   };
 
   handleCreateUser = () => {
-    const { username, email, password, roles } = this.state;
+    const { username, email, password, roleId } = this.state;
     const { navigate } = this.props.router;
     confirmAlert({
       title: 'Confirm User Creation',
@@ -42,7 +45,7 @@ class UserCreate extends Component {
         {
           label: 'Yes',
           onClick: () => {
-            UserService.createUser(username, email, password, roles)
+            UserService.createUser(username, email, password, roleId)
               .then(() => {
                 this.setState({
                   successful: true,
@@ -66,6 +69,20 @@ class UserCreate extends Component {
       ],
     });
   };
+
+  // Helper function to get role name by roleId
+  getRoleNameById(roleId) {
+    switch (roleId) {
+      case 1:
+        return "User";
+      case 2:
+        return "Organizer";
+      case 3:
+        return "Admin";
+      default:
+        return "";
+    }
+  }
 
   render() {
     return (
@@ -106,40 +123,19 @@ class UserCreate extends Component {
             />
           </div>
           <div className="form-group">
-            <label>Roles</label>
-            <div>
-              <label>
-                <input
-                  type="checkbox"
-                  name="roles"
-                  value="user"
-                  checked={this.state.roles.includes('user')}
+                <label htmlFor="role">Role</label>
+                <select
+                  type="text"
+                  className="form-control"
+                  id="role"
+                  value={this.state.roleId} // Updated to use roleId
                   onChange={this.handleRoleChange}
-                />{' '}
-                User
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  name="roles"
-                  value="eventOrganizer"
-                  checked={this.state.roles.includes('eventOrganizer')}
-                  onChange={this.handleRoleChange}
-                />{' '}
-                Event Organizer
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  name="roles"
-                  value="admin"
-                  checked={this.state.roles.includes('admin')}
-                  onChange={this.handleRoleChange}
-                />{' '}
-                Admin
-              </label>
-            </div>
-          </div>
+                >
+                  <option value="1">User</option>
+                  <option value="2">Organizer</option>
+                  <option value="3">Admin</option>
+                </select>
+              </div>
           <div>
             <button
               type="button"

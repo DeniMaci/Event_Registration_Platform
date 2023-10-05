@@ -32,6 +32,18 @@ class EventService {
   getEvent(eventId) {
     return axios.get(`${API_URL}${eventId}`, { headers: authHeader() });
   }
+
+  registerForEvent(eventId) {
+    return axios.post(
+      `${API_URL}${eventId}/register`,
+      {},
+      { headers: authHeader() }
+    );
+  }
+
+  getEventAttendees(eventId) {
+    return axios.get(`${API_URL}${eventId}/attendees`, { headers: authHeader() });
+  }
 }
 
 export default new EventService();

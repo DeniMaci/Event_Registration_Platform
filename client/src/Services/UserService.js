@@ -4,18 +4,18 @@ import authHeader from './Auth-Header';
 const API_URL = 'http://localhost:4000/api/';
 
 class UserService {
-  createUser(username, email, password, role) {
+  createUser(username, email, password, roleId) {
     return axios.post(
       API_URL + 'users',
-      { username, email, password, role },
+      { username, email, password, roleId },
       { headers: authHeader() }
     );
   }
 
-  editUser(userId, username, email, role) {
+  editUser(userId, username, email, password, role) {
     return axios.put(
       `${API_URL}users/${userId}`,
-      { username, email, role },
+      { username, email, password, role },
       { headers: authHeader() }
     );
   }

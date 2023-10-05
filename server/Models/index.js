@@ -1,4 +1,4 @@
-// db.js
+// index.js
 const Sequelize = require('sequelize');
 const dotenv = require('dotenv');
 
@@ -21,13 +21,6 @@ db.User = require("../Models/User")(sequelize, Sequelize);
 db.Role = require("../Models/Role")(sequelize, Sequelize);
 db.Event = require("../Models/Event")(sequelize, Sequelize);
 
-db.Role.belongsToMany(db.User, {
-  through: "User_Roles"
-});
-db.User.belongsToMany(db.Role, {
-  through: "User_Roles"
-});
-
 db.User.hasMany(db.Event, { foreignKey: 'organizerId' });
 db.Event.belongsTo(db.User, { foreignKey: 'organizerId' });
 
@@ -42,6 +35,8 @@ db.User.belongsToMany(db.Event, {
   as: "attendedEvents",
 });
 
-db.ROLES = ["User", "Admin", "Organizer"];
+db.User.belongsTo(db.Role, { foreignKey: 'roleId' }); // Define the association
+
+db.ROLES = ["User", "Organizer", "Admin"];
 
 module.exports = db;

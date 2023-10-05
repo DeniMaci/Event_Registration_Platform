@@ -9,33 +9,32 @@ var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 
 exports.signup = (req, res) => {
-  // Save User to Database
-  User.create({
-    username: req.body.username,
-    email: req.body.email,
-    password: bcrypt.hashSync(req.body.password, 8)
+  const { username, email, password } = req.body;
+
+  // Fetch the "User" role from the Role table
+  Role.findOne({
+    where: { name: 'User' }
   })
-    .then(user => {
-      if (req.body.roles) {
-        Role.findAll({
-          where: {
-            name: {
-              [Op.or]: req.body.roles
-            }
-          }
-        }).then(roles => {
-          user.setRoles(roles).then(() => {
-            res.send({ message: "User registered successfully!" });
-          });
-        });
-      } else {
-        // user role = 1
-        user.setRoles([1]).then(() => {
-          res.send({ message: "User registered successfully!" });
-        });
+    .then((userRole) => {
+      if (!userRole) {
+        return res.status(500).send({ message: "Default role 'User' not found." });
       }
+
+      // Create User with the fetched role's ID
+      User.create({
+        username,
+        email,
+        password: bcrypt.hashSync(password, 8),
+        roleId: userRole.id, // Set the user's role to "User" by default
+      })
+        .then((user) => {
+          res.status(201).send({ message: "User registered successfully!" });
+        })
+        .catch((err) => {
+          res.status(500).send({ message: err.message });
+        });
     })
-    .catch(err => {
+    .catch((err) => {
       res.status(500).send({ message: err.message });
     });
 };
@@ -43,15 +42,15 @@ exports.signup = (req, res) => {
 exports.signin = (req, res) => {
   User.findOne({
     where: {
-      username: req.body.username
-    }
+      username: req.body.username,
+    },
   })
-    .then(user => {
+    .then((user) => {
       if (!user) {
         return res.status(404).send({ message: "User Not found." });
       }
 
-      var passwordIsValid = bcrypt.compareSync(
+      const passwordIsValid = bcrypt.compareSync(
         req.body.password,
         user.password
       );
@@ -63,29 +62,20 @@ exports.signin = (req, res) => {
         });
       }
 
-      const token = jwt.sign({ id: user.id },
-                              config.secret,
-                              {
-                                algorithm: 'HS256',
-                                allowInsecureKeySizes: true,
-                                expiresIn: 86400, // 24 hours
-                              });
+      const token = jwt.sign({ id: user.id }, config.secret, {
+        algorithm: 'HS256',
+        expiresIn: 86400, // 24 hours
+      });
 
-      var authorities = [];
-      user.getRoles().then(roles => {
-        for (let i = 0; i < roles.length; i++) {
-          authorities.push("ROLE_" + roles[i].name.toUpperCase());
-        }
-        res.status(200).send({
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          roles: authorities,
-          accessToken: token
-        });
+      res.status(200).send({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        roleId: user.roleId, // Include the user's role in the response
+        accessToken: token
       });
     })
-    .catch(err => {
+    .catch((err) => {
       res.status(500).send({ message: err.message });
     });
 };

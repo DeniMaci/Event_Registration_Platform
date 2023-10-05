@@ -9,6 +9,7 @@ class UserEdit extends Component {
     super(props);
     this.onChangeUsername = this.onChangeUsername.bind(this);
     this.onChangeEmail = this.onChangeEmail.bind(this);
+    this.onChangePassword = this.onChangePassword.bind(this);
     this.onChangeRole = this.onChangeRole.bind(this);
     this.getUser = this.getUser.bind(this);
     this.updateUser = this.updateUser.bind(this);
@@ -19,6 +20,8 @@ class UserEdit extends Component {
         id: null,
         username: "",
         email: "",
+        roleId: "", 
+        password: "",
         role: ""
       },
       message: ""
@@ -54,13 +57,25 @@ class UserEdit extends Component {
     }));
   }
 
-  onChangeRole(e) {
-    const role = e.target.value;
+  onChangePassword(e) {
+    const password = e.target.value;
 
+    this.setState((prevState) => ({
+      currentUser: {
+        ...prevState.currentUser,
+        password: password,
+      },
+    }));
+  }
+
+  onChangeRole(e) {
+    const roleId = e.target.value; // Get the selected roleId
+    const roleName = this.getRoleNameById(roleId);
     this.setState(prevState => ({
       currentUser: {
         ...prevState.currentUser,
-        role: role
+        roleId: roleId, // Set the selected roleId
+        role: roleName // Include role name for display
       }
     }));
   }
@@ -68,9 +83,13 @@ class UserEdit extends Component {
   getUser(id) {
     UserService.getUser(id)
       .then(response => {
-        this.setState({
-          currentUser: response.data
-        });
+        this.setState(prevState => ({
+          currentUser: {
+            ...prevState.currentUser,
+            ...response.data,
+            roleId: response.data.roleId // Set the role from roleId
+          }
+        }));
       })
       .catch(e => {
         console.log(e);
@@ -79,6 +98,7 @@ class UserEdit extends Component {
 
   updateUser() {
     const { navigate } = this.props.router;
+    const { id, username, email, password, roleId } = this.state.currentUser;
     confirmAlert({
       title: "Confirm Update",
       message: "Are you sure you want to update this user?",
@@ -86,17 +106,11 @@ class UserEdit extends Component {
         {
           label: "Yes",
           onClick: () => {
-            UserService.editUser(
-              this.state.currentUser.id,
-              this.state.currentUser.username,
-              this.state.currentUser.email,
-              this.state.currentUser.role
-            )
-            .then((response) => {
-              console.log(response.data);
-              // Assuming this component is rendered within a Route component
-              navigate("/users"); // Navigate back to the user list page
-            })
+            UserService.editUser(id, username, email, password, roleId)
+              .then((response) => {
+                console.log(response.data);
+                navigate("/users"); // Navigate back to the user list page
+              })
               .catch((e) => {
                 console.log(e);
               });
@@ -135,9 +149,22 @@ class UserEdit extends Component {
     });
   }
 
+  // Helper function to get role name by roleId
+  getRoleNameById(roleId) {
+    switch (roleId) {
+      case 1:
+        return "User";
+      case 2:
+        return "Organizer";
+      case 3:
+        return "Admin";
+      default:
+        return "";
+    }
+  }
+
   render() {
     const { currentUser } = this.state;
-
     return (
       <div>
         {currentUser ? (
@@ -165,14 +192,28 @@ class UserEdit extends Component {
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="role">Role</label>
+                <label htmlFor="password">Password</label>
                 <input
+                  type="password"
+                  className="form-control"
+                  id="password"
+                  value={currentUser.password}
+                  onChange={this.onChangePassword}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="role">Role</label>
+                <select
                   type="text"
                   className="form-control"
                   id="role"
-                  value={currentUser.role}
+                  value={currentUser.roleId} // Updated to use roleId
                   onChange={this.onChangeRole}
-                />
+                >
+                  <option value="1">User</option>
+                  <option value="2">Organizer</option>
+                  <option value="3">Admin</option>
+                </select>
               </div>
             </form>
             <button className="btn btn-warning" onClick={() => this.updateUser()} >

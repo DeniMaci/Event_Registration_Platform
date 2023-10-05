@@ -1,5 +1,4 @@
 const db = require("../Models");
-const { isAdmin, isEventOrganizer } = require('../Middleware/VerifyToken')
 const Event = db.Event;
 
 // Create a new event
@@ -84,7 +83,6 @@ exports.deleteEvent = (req, res) => {
 
 // Get a list of all events
 exports.getAllEvents = (req, res) => {
-  if(isAdmin || isEventOrganizer){
   Event.findAll()
     .then((events) => {
       res.status(200).json(events);
@@ -92,7 +90,6 @@ exports.getAllEvents = (req, res) => {
     .catch((err) => {
       res.status(500).json({ message: err.message });
     });
-  }
 };
 
 // Get an event by ID
@@ -112,4 +109,36 @@ exports.getEventById = (req, res) => {
       res.status(500).json({ message: err.message });
     });
 };
+
+// EventController.js
+exports.registerForEvent = (req, res) => {
+  const { eventId } = req.params;
+  const userId = req.userId; 
+
+  // Create a new Attendee entry
+  db.Attendee.create({ eventId, userId })
+    .then(() => {
+      res.status(201).json({ message: "Registration successful." });
+    })
+    .catch((err) => {
+      res.status(500).json({ message: err.message });
+    });
+};
+
+// EventController.js
+exports.getEventAttendees = (req, res) => {
+  const { eventId } = req.params;
+
+  sequelize.models.Attendee.findAll({
+    where: { eventId },
+    include: [sequelize.models.User],
+  })
+    .then((attendees) => {
+      res.status(200).json(attendees);
+    })
+    .catch((err) => {
+      res.status(500).json({ message: err.message });
+    });
+};
+
 

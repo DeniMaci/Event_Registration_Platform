@@ -12,73 +12,51 @@ verifyToken = (req, res, next) => {
     });
   }
 
-  jwt.verify(token,
-            config.secret,
-            (err, decoded) => {
-              if (err) {
-                return res.status(401).send({
-                  message: "Unauthorized!",
-                });
-              }
-              req.userId = decoded.id;
-              next();
-            });
+  jwt.verify(token, config.secret, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({
+        message: "Unauthorized!"
+      });
+    }
+    req.userId = decoded.id;
+    next();
+  });
 };
 
 isAdmin = (req, res, next) => {
   User.findByPk(req.userId).then(user => {
-    user.getRoles().then(roles => {
-      for (let i = 0; i < roles.length; i++) {
-        if (roles[i].name === "Admin") {
-          next();
-          return;
-        }
-      }
-
+    if (user.roleId === 3 ) {
+      next();
+    } else {
       res.status(403).send({
         message: "Require Admin Role!"
       });
-      return;
-    });
+    }
   });
 };
 
 isEventOrganizer = (req, res, next) => {
   User.findByPk(req.userId).then(user => {
-    user.getRoles().then(roles => {
-      for (let i = 0; i < roles.length; i++) {
-        if (roles[i].name === "Organizer") {
-          next();
-          return;
-        }
-      }
-
+    if (user.roleId === 2 ) {
+      next();
+    } else {
       res.status(403).send({
         message: "Require Event Organizer Role!"
       });
-    });
+    }
   });
 };
 
 isEventOrganizerOrAdmin = (req, res, next) => {
   User.findByPk(req.userId).then(user => {
-    user.getRoles().then(roles => {
-      for (let i = 0; i < roles.length; i++) {
-        if (roles[i].name === "Organizer") {
-          next();
-          return;
-        }
-
-        if (roles[i].name === "Admin") {
-          next();
-          return;
-        }
-      }
-
+    if (user.roleId === 2 ||
+        user.roleId === 3 ) {
+      next();
+    } else {
       res.status(403).send({
         message: "Require Event Organizer or Admin Role!"
       });
-    });
+    }
   });
 };
 

@@ -60,11 +60,32 @@ class EventList extends Component {
     this.setState({ searchTitle: e.target.value });
   }
 
+  handleRegisterClick(eventId) {
+    EventService.registerForEvent(eventId)
+      .then(() => {
+        // Registration successful, update the event list
+        this.fetchEvents();
+      })
+      .catch((error) => {
+        console.error("Error registering for event:", error);
+      });
+  }
+
+  renderAttendees(attendees) {
+    return (
+      <div>
+        <h5>Attendees:</h5>
+        <ul>
+          {attendees.map((attendee) => (
+            <li key={attendee.id}>{attendee.username}</li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
   render() {
     const { events, searchTitle } = this.state;
-    const filteredEvents = events.filter((event) => event.eventName.toLowerCase().includes(searchTitle.toLowerCase()) || 
-                                                    event.description.toLowerCase().includes(searchTitle.toLowerCase()) ||
-                                                    event.location.toLowerCase().includes(searchTitle.toLowerCase()));
     const currentUser = AuthService.getCurrentUser();
 
     return (
@@ -74,7 +95,7 @@ class EventList extends Component {
             <input
               type="text"
               className="form-control"
-              placeholder="Search by Name, Description or Location"
+              placeholder="Search by Name, Description, or Location"
               value={searchTitle}
               onChange={(e) => this.handleSearchTitleChange(e)}
             />
@@ -89,34 +110,44 @@ class EventList extends Component {
         {/* Event List */}
         <div className="col-md-6">
           <h4>Event List</h4>
-          {currentUser && (currentUser.roles.includes("ROLE_ADMIN") || currentUser.roles.includes("ROLE_ORGANIZER")) && (
-          <Link to='/events/create' className="btn btn-success">Add</Link>
+          {currentUser && (currentUser.roleId === 3 || currentUser.roleId === 2) && (
+            <Link to='/events/create' className="btn btn-success">Add</Link>
           )}
           
           <ul className="list-group">
-            {filteredEvents.map((event) => (
+            {events.map((event) => (
               <li key={event.id} className="list-group-item">
-
                 <h3>{event.eventName}</h3>
                 <p>{event.description}</p>
                 <p>Date: {new Date(event.date).toLocaleDateString()}</p>
                 <p>Location: {event.location}</p>
 
-                {currentUser && (currentUser.roles.includes("ROLE_ADMIN") || currentUser.roles.includes("ROLE_ORGANIZER")) && (
-                <button
-                  className="btn btn-danger"
-                  onClick={() => this.handleDeleteClick(event.id)}
-                >
-                  Delete
-                </button>
+                {currentUser && (currentUser.roleId === 3 || currentUser.roleId === 2) && (
+                  <div>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => this.handleDeleteClick(event.id)}
+                    >
+                      Delete
+                    </button>
+                    <Link to={`/events/edit/${event.id}`} className="btn btn-warning">
+                      Edit
+                    </Link>
+                  </div>
                 )}
 
-                {currentUser && (currentUser.roles.includes("ROLE_ADMIN") || currentUser.roles.includes("ROLE_ORGANIZER")) && (
-                <Link to={`/events/edit/${event.id}`} className="btn btn-warning">
-                  Edit
-                </Link>
+                {currentUser && currentUser.roleId === 1 && (
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => this.handleRegisterClick(event.id)}
+                  >
+                    Register
+                  </button>
                 )}
 
+                {currentUser && (currentUser.roleId === 3 || currentUser.roleId === 2) && event.attendees && (
+                  this.renderAttendees(event.attendees)
+                )}
               </li>
             ))}
           </ul>
