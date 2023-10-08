@@ -11,8 +11,8 @@ class UserCreate extends Component {
       username: '',
       email: '',
       password: '',
-      roleId: "", 
-      role: 'user', // Default role is 'user'
+      roleId: 1, // Default role is 'User'
+      role: 'User', // Default role name is 'User'
       successful: false,
       message: '',
     };
@@ -26,13 +26,10 @@ class UserCreate extends Component {
   handleRoleChange = (e) => {
     const roleId = e.target.value; // Get the selected roleId
     const roleName = this.getRoleNameById(roleId);
-    this.setState(prevState => ({
-      currentUser: {
-        ...prevState.currentUser,
-        roleId: roleId, // Set the selected roleId
-        role: roleName // Include role name for display
-      }
-    }));
+    this.setState({
+      roleId: roleId, // Set the selected roleId
+      role: roleName, // Include role name for display
+    });
   };
 
   handleCreateUser = () => {
@@ -73,14 +70,14 @@ class UserCreate extends Component {
   // Helper function to get role name by roleId
   getRoleNameById(roleId) {
     switch (roleId) {
-      case 1:
-        return "User";
-      case 2:
-        return "Organizer";
-      case 3:
-        return "Admin";
+      case '1':
+        return 'User';
+      case '2':
+        return 'Organizer';
+      case '3':
+        return 'Admin';
       default:
-        return "";
+        return '';
     }
   }
 
@@ -123,29 +120,34 @@ class UserCreate extends Component {
             />
           </div>
           <div className="form-group">
-                <label htmlFor="role">Role</label>
-                <select
-                  type="text"
-                  className="form-control"
-                  id="role"
-                  value={this.state.roleId} // Updated to use roleId
-                  onChange={this.handleRoleChange}
-                >
-                  <option value="1">User</option>
-                  <option value="2">Organizer</option>
-                  <option value="3">Admin</option>
-                </select>
-              </div>
+            <label htmlFor="role">Role</label>
+            <select
+              type="text"
+              className="form-control"
+              id="role"
+              value={this.state.roleId}
+              onChange={this.handleRoleChange}
+            >
+              <option value="1">User</option>
+              <option value="2">Organizer</option>
+              <option value="3">Admin</option>
+            </select>
+          </div>
           <div>
             <button
               type="button"
               className="btn btn-success"
-              onClick={this.handleCreateUser}>
+              onClick={this.handleCreateUser}
+            >
               Create User
             </button>
           </div>
           {this.state.message && (
-            <div className={this.state.successful ? 'alert alert-success' : 'alert alert-danger'}>
+            <div
+              className={
+                this.state.successful ? 'alert alert-success' : 'alert alert-danger'
+              }
+            >
               {this.state.message}
             </div>
           )}

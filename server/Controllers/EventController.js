@@ -1,5 +1,7 @@
 const db = require("../Models");
 const Event = db.Event;
+const Attendee = db.Attendee;
+const User = db.User;
 
 // Create a new event
 exports.createEvent = (req, res) => {
@@ -89,7 +91,7 @@ exports.getAllEvents = (req, res) => {
     })
     .catch((err) => {
       res.status(500).json({ message: err.message });
-    });
+    });  
 };
 
 // Get an event by ID
@@ -116,7 +118,7 @@ exports.registerForEvent = (req, res) => {
   const userId = req.userId; 
 
   // Create a new Attendee entry
-  db.Attendee.create({ eventId, userId })
+  Attendee.create({ eventId, userId })
     .then(() => {
       res.status(201).json({ message: "Registration successful." });
     })
@@ -129,9 +131,9 @@ exports.registerForEvent = (req, res) => {
 exports.getEventAttendees = (req, res) => {
   const { eventId } = req.params;
 
-  sequelize.models.Attendee.findAll({
+  Attendee.findAll({
     where: { eventId },
-    include: [sequelize.models.User],
+    include: [User],
   })
     .then((attendees) => {
       res.status(200).json(attendees);

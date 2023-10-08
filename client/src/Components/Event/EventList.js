@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import EventService from "../../Services/EventService";
-import AuthService from '../../Services/AuthService';
+import AuthService from "../../Services/AuthService";
 import { Link } from "react-router-dom";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
-import './EventList.css'
+import "../Event/EventList.css";
 
 class EventList extends Component {
   constructor(props) {
@@ -12,11 +12,17 @@ class EventList extends Component {
     this.state = {
       events: [],
       searchTitle: "",
+      currentUser: AuthService.getCurrentUser(),
+      attendeesMap: {}, // Store attendees for each event by eventId
     };
   }
 
   componentDidMount() {
     this.fetchEvents();
+    
+    this.state.events.forEach(event => {
+      this.fetchAttendees(event.id);
+    });
   }
 
   fetchEvents() {
@@ -28,6 +34,20 @@ class EventList extends Component {
       })
       .catch((error) => {
         console.error("Error fetching events:", error);
+      });
+  }
+
+  fetchAttendees(eventId) {
+    EventService.getEventAttendees(eventId)
+      .then((response) => {
+        const { attendeesMap } = this.state;
+        attendeesMap[eventId] = response.data;
+        this.setState({
+          attendeesMap,
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching attendees:", error);
       });
   }
 
@@ -50,7 +70,7 @@ class EventList extends Component {
         },
         {
           label: "No",
-          onClick: () => { }
+          onClick: () => {},
         },
       ],
     });
@@ -65,19 +85,24 @@ class EventList extends Component {
       .then(() => {
         // Registration successful, update the event list
         this.fetchEvents();
+        // Fetch attendees for the registered event
+        this.fetchAttendees(eventId);
       })
       .catch((error) => {
         console.error("Error registering for event:", error);
       });
   }
 
-  renderAttendees(attendees) {
+  renderAttendees(eventId) {
+    const { attendeesMap } = this.state;
+    const attendees = attendeesMap[eventId] || [];
+
     return (
       <div>
         <h5>Attendees:</h5>
         <ul>
           {attendees.map((attendee) => (
-            <li key={attendee.id}>{attendee.username}</li>
+            <li key={attendee}>{attendee}</li>
           ))}
         </ul>
       </div>
@@ -85,9 +110,7 @@ class EventList extends Component {
   }
 
   render() {
-    const { events, searchTitle } = this.state;
-    const currentUser = AuthService.getCurrentUser();
-
+    const { events, searchTitle, currentUser, attendeesMap } = this.state;
     return (
       <div className="list row">
         <div className="col-md-8">
@@ -95,7 +118,7 @@ class EventList extends Component {
             <input
               type="text"
               className="form-control"
-              placeholder="Search by Name, Description, or Location"
+              placeholder="Search By Event Name"
               value={searchTitle}
               onChange={(e) => this.handleSearchTitleChange(e)}
             />
@@ -110,10 +133,13 @@ class EventList extends Component {
         {/* Event List */}
         <div className="col-md-6">
           <h4>Event List</h4>
-          {currentUser && (currentUser.roleId === 3 || currentUser.roleId === 2) && (
-            <Link to='/events/create' className="btn btn-success">Add</Link>
-          )}
-          
+          {currentUser &&
+            (currentUser.roleId === 3 || currentUser.roleId === 2) && (
+              <Link to="/events/create" className="btn btn-success">
+                Add
+              </Link>
+            )}
+
           <ul className="list-group">
             {events.map((event) => (
               <li key={event.id} className="list-group-item">
@@ -122,7 +148,8 @@ class EventList extends Component {
                 <p>Date: {new Date(event.date).toLocaleDateString()}</p>
                 <p>Location: {event.location}</p>
 
-                {currentUser && (currentUser.roleId === 3 || currentUser.roleId === 2) && (
+                {currentUser &&
+                (currentUser.roleId === 3 || currentUser.roleId === 2) && (
                   <div>
                     <button
                       className="btn btn-danger"
@@ -130,24 +157,35 @@ class EventList extends Component {
                     >
                       Delete
                     </button>
-                    <Link to={`/events/edit/${event.id}`} className="btn btn-warning">
+                    <Link
+                      to={`/events/edit/${event.id}`}
+                      className="btn btn-warning"
+                    >
                       Edit
                     </Link>
                   </div>
                 )}
 
-                {currentUser && currentUser.roleId === 1 && (
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => this.handleRegisterClick(event.id)}
-                  >
-                    Register
-                  </button>
-                )}
-
-                {currentUser && (currentUser.roleId === 3 || currentUser.roleId === 2) && event.attendees && (
-                  this.renderAttendees(event.attendees)
-                )}
+                {currentUser && currentUser.roleId === 1 ? (
+                  attendeesMap[event.id] &&
+                  attendeesMap[event.id].some(
+                    (a) => a.user.id === currentUser.id
+                  ) ? (
+                    <button className="btn btn-secondary" disabled>
+                      Registered
+                    </button>
+                  ) : (
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => this.handleRegisterClick(event.id)}
+                    >
+                      Register
+                    </button>
+                  )
+                ) : null}
+                {currentUser &&
+                  (currentUser.roleId === 3 || currentUser.roleId === 2 || currentUser === 1) &&
+                  this.renderAttendees(event.id)}
               </li>
             ))}
           </ul>

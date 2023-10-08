@@ -1,20 +1,9 @@
-// Models/Event.js
-module.exports = (sequelize, Sequelize) => {
-  const Event = sequelize.define("Event", {
-    eventName: {
-      type: Sequelize.STRING,
-      allowNull: false,
-    },
-    description: {
-      type: Sequelize.TEXT,
-    },
-    date: {
-      type: Sequelize.DATE,
-      allowNull: false,
-    },
-    location: {
-      type: Sequelize.STRING,
-    },
+module.exports = (sequelize, DataTypes) => {
+  const Event = sequelize.define('Event', {
+    eventName: DataTypes.STRING,
+    description: DataTypes.TEXT,
+    date: DataTypes.DATE,
+    location: DataTypes.STRING,
   });
 
   return Event;

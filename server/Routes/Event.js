@@ -29,13 +29,13 @@ app.get("/api/events", EventController.getAllEvents);
 app.get("/api/events/:id", EventController.getEventById);
 
 app.post(
-  "/events/:eventId/register",
+  "/api/events/:eventId/register",
   [authJwt.verifyToken],
   EventController.registerForEvent
 );
 
 app.get(
-  "/events/:eventId/attendees",
+  "/api/events/:eventId/attendees",
   [authJwt.verifyToken, authJwt.isEventOrganizerOrAdmin],
   EventController.getEventAttendees
 );

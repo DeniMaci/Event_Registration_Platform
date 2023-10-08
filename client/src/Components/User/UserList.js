@@ -60,7 +60,7 @@ class UserList extends Component {
 
   render() {
     const { users, searchTitle } = this.state;
-    console.log(users);
+    
     const filteredUsers = users.filter((user) =>
       user.username.toLowerCase().includes(searchTitle.toLowerCase())
     );

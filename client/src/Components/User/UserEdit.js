@@ -87,6 +87,7 @@ class UserEdit extends Component {
           currentUser: {
             ...prevState.currentUser,
             ...response.data,
+            password: "",
             roleId: response.data.roleId // Set the role from roleId
           }
         }));

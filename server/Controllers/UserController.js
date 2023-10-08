@@ -1,14 +1,11 @@
 const db = require("../Models");
 const User = db.User;
-const Role = db.Role;
 const bcrypt = require("bcryptjs");
-
-const Op = db.Sequelize.Op;
 
 // Create a new user
 exports.createUser = (req, res) => {
   // Implement validation and authorization checks here
-  const { username, email, password, role } = req.body;
+  const { username, email, password, roleId } = req.body;
 
   // Hash the password before saving it to the database
   const hashedPassword = bcrypt.hashSync(password, 8);
@@ -17,7 +14,7 @@ exports.createUser = (req, res) => {
     username,
     email,
     password: hashedPassword, // Store the hashed password
-    roleId: role, // Set the roleId directly
+    roleId: roleId, // Set the roleId directly
   })
     .then((user) => {
       res.status(201).json(user);
