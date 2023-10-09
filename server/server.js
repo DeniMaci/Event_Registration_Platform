@@ -66,4 +66,12 @@ function initial() {
     password: bcrypt.hashSync("111111", 8),
     roleId: 1
   });
+
+  User.create({
+    id: 3,
+    username: "organizer",
+    email: "organizer@gmail.com",
+    password: bcrypt.hashSync("111111", 8),
+    roleId: 2
+  });
 }
