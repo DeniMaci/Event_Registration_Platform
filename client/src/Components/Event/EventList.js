@@ -26,16 +26,42 @@ class EventList extends Component {
     EventService.getAllEvents()
       .then((response) => {
         const events = response.data;
+  
+        // Create an array of promises to check registration status for each event
         const registrationPromises = events.map((event) => {
           return EventService.isUserRegisteredForEvent(event.id);
         });
   
+        // Wait for all registration status checks to resolve
         Promise.all(registrationPromises)
           .then((registrationResponses) => {
+            // Map registration status to events
             const updatedEvents = events.map((event, index) => ({
               ...event,
               isRegistered: registrationResponses[index].data.isRegistered,
             }));
+  
+            // Fetch attendees for each event only if the user is not a regular user
+            if (!this.isUser()) {
+              const eventPromises = updatedEvents.map((event) => {
+                return EventService.getEventAttendees(event.id);
+              });
+  
+              // Wait for all attendee requests to resolve
+              Promise.all(eventPromises)
+                .then((attendeesData) => {
+                  const attendeesDataMap = {};
+                  attendeesData.forEach((data, index) => {
+                    attendeesDataMap[updatedEvents[index].id] = data.data;
+                  });
+  
+                  // Fetch user data for attendees
+                  this.fetchUserDataForAttendees(attendeesDataMap);
+                })
+                .catch((error) => {
+                  console.error("Error fetching attendees for events:", error);
+                });
+            }
   
             this.setState({
               events: updatedEvents,
@@ -49,6 +75,8 @@ class EventList extends Component {
         console.error("Error fetching events:", error);
       });
   }
+  
+  
 
   // Fetch user data for attendees
   fetchUserDataForAttendees(attendeesDataMap) {
@@ -102,6 +130,11 @@ class EventList extends Component {
   isAdmin() {
     const { currentUser } = this.state;
     return currentUser && currentUser.roleId === 3;
+  }
+
+  isUser() {
+    const { currentUser } = this.state;
+    return currentUser && currentUser.roleId === 1;
   }
 
   handleDeleteClick(eventId) {
@@ -205,7 +238,7 @@ class EventList extends Component {
                 Add
               </Link>
             )}
-          {currentUser && currentUser.roleId === 1 && (
+          {this.isUser() && (
           <ul className="list-group">
             {filteredEvents.map((event) => (
             <li key={event.id} className="list-group-item">
