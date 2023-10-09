@@ -15,17 +15,11 @@ class EventList extends Component {
       searchTitle: "",
       currentUser: AuthService.getCurrentUser(),
       attendeesData: {},
-      registeredEvents: [],
     };
   }
 
   componentDidMount() {
     this.fetchEvents();
-
-    const registeredEvents = localStorage.getItem("registeredEvents");
-    if (registeredEvents) {
-      this.setState({ registeredEvents: JSON.parse(registeredEvents) });
-    }
   }
 
   fetchEvents() {
@@ -129,23 +123,25 @@ class EventList extends Component {
   }
 
   handleRegisterClick(eventId) {
-    EventService.registerForEvent(eventId)
-      .then(() => {
-        this.setState(
-          (prevState) => ({
-            registeredEvents: [...prevState.registeredEvents, eventId],
-          }),
-          () => {
-            // Save registered event IDs to local storage
-            localStorage.setItem(
-              "registeredEvents",
-              JSON.stringify(this.state.registeredEvents)
-            );
-          }
-        );
+    // Check if the user is already registered for the event
+    EventService.isUserRegisteredForEvent(eventId)
+      .then((response) => {
+        if (response.data.isRegistered) {
+          // User is already registered, show a message or disable the button
+          alert("You are already registered for this event.");
+        } else {
+          // User is not registered, proceed with registration
+          EventService.registerForEvent(eventId)
+            .then(() => {
+              this.fetchEvents(); // Refresh the event list
+            })
+            .catch((error) => {
+              console.error("Error registering for event:", error);
+            });
+        }
       })
       .catch((error) => {
-        console.error("Error registering for event:", error);
+        console.error("Error checking registration status:", error);
       });
   }
 
@@ -160,7 +156,6 @@ class EventList extends Component {
       currentUser,
       attendeesData,
       usersData,
-      registeredEvents,
     } = this.state;
 
     return (
@@ -200,18 +195,12 @@ class EventList extends Component {
                   <p>Date: {new Date(event.date).toLocaleDateString()}</p>
                   <p>Location: {event.location}</p>
 
-                  {registeredEvents.includes(event.id) ? (
-                    <button className="btn btn-success" disabled>
-                      Registered
-                    </button>
-                  ) : (
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => this.handleRegisterClick(event.id)}
-                    >
-                      Register
-                    </button>
-                  )}
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => this.handleRegisterClick(event.id)}
+                  >
+                    Register
+                  </button>
                 </li>
               ))}
             </ul>

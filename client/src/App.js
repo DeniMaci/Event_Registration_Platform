@@ -77,14 +77,6 @@ class App extends Component {
               </Link>
             </li>
 
-            {showEventOrganizerBoard && (
-              <li className="nav-item">
-                <Link to={"/eventOrganizer"} className="nav-link">
-                  Event Organizer Dashboard
-                </Link>
-              </li>
-            )}
-
             {showAdminBoard && (
               <li className="nav-item">
                 <Link to={"/users"} className="nav-link">

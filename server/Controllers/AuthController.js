@@ -77,3 +77,48 @@ exports.signin = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.updateProfile = (req, res) => {
+  const { username, email, currentPassword, newPassword } = req.body;
+  const userId = req.userId;
+
+  // Find the user by ID
+  User.findByPk(userId)
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send({ message: "User not found." });
+      }
+
+      // Check if the provided current password matches the stored hashed password
+      const passwordIsValid = bcrypt.compareSync(currentPassword, user.password);
+
+      if (!passwordIsValid) {
+        return res.status(401).send({
+          message: "Current password is incorrect.",
+        });
+      }
+
+      // Update the user's profile fields (username and email)
+      user.username = username;
+      user.email = email;
+
+      // If a new password is provided, update it (ensure you hash the new password)
+      if (newPassword) {
+        user.password = bcrypt.hashSync(newPassword, 8);
+      }
+
+      // Save the updated user
+      user
+        .save()
+        .then(() => {
+          res.status(200).send({ message: "Profile updated successfully." });
+        })
+        .catch((error) => {
+          res.status(500).send({ message: error.message });
+        });
+    })
+    .catch((error) => {
+      res.status(500).send({ message: error.message });
+    });
+};
+

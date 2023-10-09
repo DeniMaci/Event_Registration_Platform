@@ -26,7 +26,6 @@ exports.createUser = (req, res) => {
 
 // Edit an existing user by ID
 exports.editUser = (req, res) => {
-  // Implement validation and authorization checks here
   const userId = req.params.id; // Assuming you receive the user ID in the request parameters
   const { username, email, password, role } = req.body;
   User.findByPk(userId)
@@ -95,7 +94,7 @@ exports.getAllUsers = (req, res) => {
 
 // Get a user by ID
 exports.getUserById = (req, res) => {
-  const userId = req.params.id; // Assuming you receive the user ID in the request parameters
+  const userId = req.params.id;
 
   User.findByPk(userId)
     .then((user) => {

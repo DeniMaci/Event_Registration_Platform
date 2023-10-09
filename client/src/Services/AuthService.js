@@ -1,4 +1,5 @@
 import axios from "axios";
+import authHeader from './Auth-Header';
 
 const API_URL = "http://localhost:4000/api/auth/";
 
@@ -33,6 +34,16 @@ class AuthService {
   getCurrentUser() {
     return JSON.parse(localStorage.getItem('User'));;
   }
+
+  updateProfile(currentUser, newPassword) {
+    return axios.put(API_URL + "update-profile", {
+      username: currentUser.username,
+      email: currentUser.email,
+      currentPassword: currentUser.currentPassword, // Include the current password
+      newPassword: newPassword, // Include the new password if changed
+    }, { headers: authHeader() });
+  }
+  
 }
 
 export default new AuthService();

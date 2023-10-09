@@ -40,4 +40,10 @@ app.get(
   EventController.getEventAttendees
 );
 
+// Check if a user is registered for an event
+app.get("/api/events/:eventId/is-registered",
+ [authJwt.verifyToken],
+  EventController.isUserRegisteredForEvent
+  );
+
 };

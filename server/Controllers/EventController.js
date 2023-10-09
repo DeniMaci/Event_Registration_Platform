@@ -142,6 +142,25 @@ exports.registerForEvent = (req, res) => {
     });
 };
 
+exports.isUserRegisteredForEvent = (req, res) => {
+  const { eventId } = req.params;
+  const userId = req.userId;
+
+  Attendee.findOne({
+    where: { eventId, userId },
+  })
+    .then((existingAttendee) => {
+      if (existingAttendee) {
+        res.status(200).json({ isRegistered: true });
+      } else {
+        res.status(200).json({ isRegistered: false });
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({ message: err.message });
+    });
+};
+
 // EventController.js
 exports.getEventAttendees = (req, res) => {
   const { eventId } = req.params;

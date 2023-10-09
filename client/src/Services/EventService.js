@@ -41,6 +41,10 @@ class EventService {
     );
   }
 
+  isUserRegisteredForEvent(eventId) {
+    return axios.get(`${API_URL}${eventId}/is-registered`, { headers: authHeader() });
+  }
+
   getEventAttendees(eventId) {
     return axios.get(`${API_URL}${eventId}/attendees`, { headers: authHeader() });
   }

@@ -42,7 +42,7 @@ module.exports = function(app) {
   // Get a user by ID
   app.get(
     "/api/users/:id", 
-    [authJwt.verifyToken, authJwt.isAdmin],
+    [authJwt.verifyToken, authJwt.isEventOrganizerOrAdmin],
     UserController.getUserById
     );
 };
