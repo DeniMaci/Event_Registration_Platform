@@ -31,6 +31,13 @@ class UserService {
   getUser(userId) {
     return axios.get(`${API_URL}users/${userId}`, { headers: authHeader() });
   }
+
+  getUsersByIds(userIds) {
+    const userPromises = userIds.map(userId =>
+      axios.get(`${API_URL}users/${userId}`, { headers: authHeader() })
+    );
+    return Promise.all(userPromises);
+  }
 }
 
 export default new UserService();

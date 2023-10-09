@@ -115,12 +115,27 @@ exports.getEventById = (req, res) => {
 // EventController.js
 exports.registerForEvent = (req, res) => {
   const { eventId } = req.params;
-  const userId = req.userId; 
+  const userId = req.userId;
 
-  // Create a new Attendee entry
-  Attendee.create({ eventId, userId })
-    .then(() => {
-      res.status(201).json({ message: "Registration successful." });
+  // Check if the user is already registered for the event
+  Attendee.findOne({
+    where: { eventId, userId },
+  })
+    .then((existingAttendee) => {
+      if (existingAttendee) {
+        return res
+          .status(400)
+          .json({ message: "You are already registered for this event." });
+      }
+
+      // Create a new Attendee entry
+      Attendee.create({ eventId, userId })
+        .then(() => {
+          res.status(201).json({ message: "Registration successful." });
+        })
+        .catch((err) => {
+          res.status(500).json({ message: err.message });
+        });
     })
     .catch((err) => {
       res.status(500).json({ message: err.message });
@@ -132,8 +147,7 @@ exports.getEventAttendees = (req, res) => {
   const { eventId } = req.params;
 
   Attendee.findAll({
-    where: { eventId },
-    include: [User],
+    where: { eventId }
   })
     .then((attendees) => {
       res.status(200).json(attendees);

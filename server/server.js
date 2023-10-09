@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const bcrypt = require("bcryptjs");
 
 dotenv.config()
 const app = express()
@@ -13,7 +14,8 @@ app.use(cors(corsOptions));
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 
-const db = require('./Models')
+const db = require('./Models');
+const User = db.User;
 const Role = db.Role;
 
 // db.sequelize.sync();
@@ -22,11 +24,6 @@ const Role = db.Role;
      console.log('Drop and Resync Database with { force: true }');
      initial();
    });
-
-// simple route
-app.get("/", (req, res) => {
-  res.json({ message: "Welcome to Event Registration Platform." });
-});
 
 // routes
 require('./Routes/Auth.js')(app);
@@ -52,5 +49,21 @@ function initial() {
   Role.create({
     id: 3,
     name: "Admin"
+  });
+
+  User.create({
+    id: 1,
+    username: "Admin",
+    email: "admin@gmail.com",
+    password: bcrypt.hashSync("111111", 8),
+    roleId: 3
+  });
+
+  User.create({
+    id: 2,
+    username: "user",
+    email: "user@gmail.com",
+    password: bcrypt.hashSync("111111", 8),
+    roleId: 1
   });
 }

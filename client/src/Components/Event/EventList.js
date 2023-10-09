@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import EventService from "../../Services/EventService";
 import AuthService from "../../Services/AuthService";
+import UserService from "../../Services/UserService"; 
 import { Link } from "react-router-dom";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
-import "../Event/EventList.css";
+import "./EventList.css";
 
 class EventList extends Component {
   constructor(props) {
@@ -13,42 +14,78 @@ class EventList extends Component {
       events: [],
       searchTitle: "",
       currentUser: AuthService.getCurrentUser(),
-      attendeesMap: {}, // Store attendees for each event by eventId
+      attendeesData: {},
     };
   }
 
   componentDidMount() {
     this.fetchEvents();
-    
-    this.state.events.forEach(event => {
-      this.fetchAttendees(event.id);
-    });
   }
 
   fetchEvents() {
     EventService.getAllEvents()
       .then((response) => {
+        const events = response.data;
         this.setState({
-          events: response.data,
+          events,
         });
+
+        // Check if the current user is an admin or event organizer
+        if (this.isEventOrganizerOrAdmin()) {
+          // Fetch attendees for each event
+          const eventPromises = events.map((event) => {
+            return EventService.getEventAttendees(event.id);
+          });
+
+          // Wait for all attendee requests to resolve
+          Promise.all(eventPromises)
+            .then((attendeesData) => {
+              const attendeesDataMap = {};
+              attendeesData.forEach((data, index) => {
+                attendeesDataMap[events[index].id] = data.data;
+              });
+
+              // Fetch user data for attendees
+              this.fetchUserDataForAttendees(attendeesDataMap);
+            })
+            .catch((error) => {
+              console.error("Error fetching attendees for events:", error);
+            });
+        }
       })
       .catch((error) => {
         console.error("Error fetching events:", error);
       });
   }
 
-  fetchAttendees(eventId) {
-    EventService.getEventAttendees(eventId)
-      .then((response) => {
-        const { attendeesMap } = this.state;
-        attendeesMap[eventId] = response.data;
+  // Fetch user data for attendees
+  fetchUserDataForAttendees(attendeesDataMap) {
+    const userIds = Object.values(attendeesDataMap).flat().map((attendee) => attendee.userId);
+
+    UserService.getUsersByIds(userIds)
+      .then((userResponses) => {
+        const usersData = {};
+        userResponses.forEach((response) => {
+          const user = response.data;
+          usersData[user.id] = user;
+        });
+
         this.setState({
-          attendeesMap,
+          attendeesData: attendeesDataMap,
+          usersData: usersData,
         });
       })
       .catch((error) => {
-        console.error("Error fetching attendees:", error);
+        console.error("Error fetching user data for attendees:", error);
       });
+  }
+
+  isEventOrganizerOrAdmin() {
+    const { currentUser } = this.state;
+    return (
+      currentUser &&
+      (currentUser.roleId === 2 || currentUser.roleId === 3)
+    );
   }
 
   handleDeleteClick(eventId) {
@@ -76,41 +113,24 @@ class EventList extends Component {
     });
   }
 
-  handleSearchTitleChange(e) {
-    this.setState({ searchTitle: e.target.value });
-  }
-
   handleRegisterClick(eventId) {
     EventService.registerForEvent(eventId)
       .then(() => {
-        // Registration successful, update the event list
+        // Update the list of events after registration
         this.fetchEvents();
-        // Fetch attendees for the registered event
-        this.fetchAttendees(eventId);
       })
       .catch((error) => {
         console.error("Error registering for event:", error);
       });
   }
 
-  renderAttendees(eventId) {
-    const { attendeesMap } = this.state;
-    const attendees = attendeesMap[eventId] || [];
-
-    return (
-      <div>
-        <h5>Attendees:</h5>
-        <ul>
-          {attendees.map((attendee) => (
-            <li key={attendee}>{attendee}</li>
-          ))}
-        </ul>
-      </div>
-    );
+  handleSearchTitleChange(e) {
+    this.setState({ searchTitle: e.target.value });
   }
 
   render() {
-    const { events, searchTitle, currentUser, attendeesMap } = this.state;
+    const { events, searchTitle, currentUser, attendeesData, usersData } = this.state;
+
     return (
       <div className="list row">
         <div className="col-md-8">
@@ -139,56 +159,76 @@ class EventList extends Component {
                 Add
               </Link>
             )}
+          {currentUser && currentUser.roleId === 1 && (
+            <ul className="list-group">
+              {events.map((event) => (
+                <li key={event.id} className="list-group-item">
+                  <h3>{event.eventName}</h3>
+                  <p>{event.description}</p>
+                  <p>Date: {new Date(event.date).toLocaleDateString()}</p>
+                  <p>Location: {event.location}</p>
 
-          <ul className="list-group">
-            {events.map((event) => (
-              <li key={event.id} className="list-group-item">
-                <h3>{event.eventName}</h3>
-                <p>{event.description}</p>
-                <p>Date: {new Date(event.date).toLocaleDateString()}</p>
-                <p>Location: {event.location}</p>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => this.handleRegisterClick(event.id)}
+                  >
+                    Register
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
 
-                {currentUser &&
-                (currentUser.roleId === 3 || currentUser.roleId === 2) && (
-                  <div>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => this.handleDeleteClick(event.id)}
-                    >
-                      Delete
-                    </button>
-                    <Link
-                      to={`/events/edit/${event.id}`}
-                      className="btn btn-warning"
-                    >
-                      Edit
-                    </Link>
-                  </div>
-                )}
+          {this.isEventOrganizerOrAdmin() && (
+            <ul className="list-group">
+              {events.map((event) => (
+                <li key={event.id} className="list-group-item">
+                  <h3>{event.eventName}</h3>
+                  <p>{event.description}</p>
+                  <p>Date: {new Date(event.date).toLocaleDateString()}</p>
+                  <p>Location: {event.location}</p>
 
-                {currentUser && currentUser.roleId === 1 ? (
-                  attendeesMap[event.id] &&
-                  attendeesMap[event.id].some(
-                    (a) => a.user.id === currentUser.id
-                  ) ? (
-                    <button className="btn btn-secondary" disabled>
-                      Registered
-                    </button>
-                  ) : (
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => this.handleRegisterClick(event.id)}
-                    >
-                      Register
-                    </button>
-                  )
-                ) : null}
-                {currentUser &&
-                  (currentUser.roleId === 3 || currentUser.roleId === 2 || currentUser === 1) &&
-                  this.renderAttendees(event.id)}
-              </li>
-            ))}
-          </ul>
+                  {currentUser.roleId === 3 && (
+                    <div>
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => this.handleDeleteClick(event.id)}
+                      >
+                        Delete
+                      </button>
+                      <Link
+                        to={`/events/edit/${event.id}`}
+                        className="btn btn-warning"
+                      >
+                        Edit
+                      </Link>
+                    </div>
+                  )}
+
+                  {currentUser.roleId === 3 && (
+                    <div>
+                      {/* Display attendees for event organizer */}
+                      <h5>Attendees:</h5>
+                      <ul>
+                        {attendeesData[event.id] &&
+                          attendeesData[event.id].map((attendee) => (
+                            <li key={attendee.userId}>
+                              {usersData[attendee.userId] ? usersData[attendee.userId].username : 'Unknown User'}
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {!currentUser && (
+            <div className="alert alert-info" role="alert">
+              Please <Link to="/login">login</Link> to view and register for events.
+            </div>
+          )}
         </div>
       </div>
     );
