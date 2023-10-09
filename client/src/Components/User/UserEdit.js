@@ -100,6 +100,13 @@ class UserEdit extends Component {
   updateUser() {
     const { navigate } = this.props.router;
     const { id, username, email, password, roleId } = this.state.currentUser;
+
+    // Validate password length
+    if (password && password.length < 6) {
+      this.setState({ message: "Password must be at least 6 characters long." });
+      return;
+    }
+    
     confirmAlert({
       title: "Confirm Update",
       message: "Are you sure you want to update this user?",

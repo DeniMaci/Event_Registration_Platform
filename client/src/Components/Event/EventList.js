@@ -26,32 +26,24 @@ class EventList extends Component {
     EventService.getAllEvents()
       .then((response) => {
         const events = response.data;
-        this.setState({
-          events,
+        const registrationPromises = events.map((event) => {
+          return EventService.isUserRegisteredForEvent(event.id);
         });
-
-        // Check if the current user is an admin or event organizer
-        if (this.isEventOrganizerOrAdmin()) {
-          // Fetch attendees for each event
-          const eventPromises = events.map((event) => {
-            return EventService.getEventAttendees(event.id);
-          });
-
-          // Wait for all attendee requests to resolve
-          Promise.all(eventPromises)
-            .then((attendeesData) => {
-              const attendeesDataMap = {};
-              attendeesData.forEach((data, index) => {
-                attendeesDataMap[events[index].id] = data.data;
-              });
-
-              // Fetch user data for attendees
-              this.fetchUserDataForAttendees(attendeesDataMap);
-            })
-            .catch((error) => {
-              console.error("Error fetching attendees for events:", error);
+  
+        Promise.all(registrationPromises)
+          .then((registrationResponses) => {
+            const updatedEvents = events.map((event, index) => ({
+              ...event,
+              isRegistered: registrationResponses[index].data.isRegistered,
+            }));
+  
+            this.setState({
+              events: updatedEvents,
             });
-        }
+          })
+          .catch((error) => {
+            console.error("Error checking registration status:", error);
+          });
       })
       .catch((error) => {
         console.error("Error fetching events:", error);
@@ -71,6 +63,21 @@ class EventList extends Component {
           const user = response.data;
           usersData[user.id] = user;
         });
+
+        const updatedUsersData = { ...usersData };
+        Object.keys(attendeesDataMap).forEach((eventId) => {
+        const attendees = attendeesDataMap[eventId];
+        attendees.forEach((attendee) => {
+          const userId = attendee.userId;
+          if (!updatedUsersData[userId]) {
+            return;
+          }
+          if (!updatedUsersData[userId].registeredEvents) {
+            updatedUsersData[userId].registeredEvents = [];
+          }
+          updatedUsersData[userId].registeredEvents.push(Number(eventId));
+        });
+      });
 
         this.setState({
           attendeesData: attendeesDataMap,
@@ -127,8 +134,15 @@ class EventList extends Component {
     EventService.isUserRegisteredForEvent(eventId)
       .then((response) => {
         if (response.data.isRegistered) {
-          // User is already registered, show a message or disable the button
-          alert("You are already registered for this event.");
+          this.setState((prevState) => {
+            const updatedEvents = prevState.events.map((event) => {
+              if (event.id === eventId) {
+                return { ...event, isRegistered: true };
+              }
+              return event;
+            });
+            return { events: updatedEvents };
+          });
         } else {
           // User is not registered, proceed with registration
           EventService.registerForEvent(eventId)
@@ -145,19 +159,24 @@ class EventList extends Component {
       });
   }
 
+  isUserRegistered(eventId, currentUser) {
+    if (!currentUser || !Array.isArray(currentUser.registeredEvents)) {
+      return false;
+    }
+    return currentUser.registeredEvents.includes(eventId);
+  }
+  
+
   handleSearchTitleChange(e) {
     this.setState({ searchTitle: e.target.value });
   }
 
   render() {
-    const {
-      events,
-      searchTitle,
-      currentUser,
-      attendeesData,
-      usersData,
-    } = this.state;
+    const { events, searchTitle, currentUser, attendeesData, usersData, } = this.state;
 
+    const filteredEvents = events.filter((event) =>
+      event.eventName.toLowerCase().includes(searchTitle.toLowerCase())
+    );
     return (
       <div className="list row">
         <div className="col-md-8">
@@ -187,28 +206,34 @@ class EventList extends Component {
               </Link>
             )}
           {currentUser && currentUser.roleId === 1 && (
-            <ul className="list-group">
-              {events.map((event) => (
-                <li key={event.id} className="list-group-item">
-                  <h3>{event.eventName}</h3>
-                  <p>{event.description}</p>
-                  <p>Date: {new Date(event.date).toLocaleDateString()}</p>
-                  <p>Location: {event.location}</p>
+          <ul className="list-group">
+            {filteredEvents.map((event) => (
+            <li key={event.id} className="list-group-item">
+            <h3>{event.eventName}</h3>
+            <p>{event.description}</p>
+            <p>Date: {new Date(event.date).toLocaleDateString()}</p>
+            <p>Location: {event.location}</p>
 
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => this.handleRegisterClick(event.id)}
-                  >
-                    Register
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+            {event.isRegistered ? (
+            <button className="btn btn-primary" disabled>
+                 Registered
+            </button>
+             ) : (
+            <button
+                className="btn btn-primary"
+                onClick={() => this.handleRegisterClick(event.id)}
+                >
+                     Register
+            </button>
+    )}
+  </li>
+    ))}
+  </ul>
+)}
 
           {this.isEventOrganizerOrAdmin() && (
             <ul className="list-group">
-              {events.map((event) => (
+              {filteredEvents.map((event) => (
                 <li key={event.id} className="list-group-item">
                   <h3>{event.eventName}</h3>
                   <p>{event.description}</p>
