@@ -12,10 +12,10 @@ class UserService {
     );
   }
 
-  editUser(userId, username, email, password, role) {
+  editUser(userId, username, email, role) {
     return axios.put(
       `${API_URL}users/${userId}`,
-      { username, email, password, role },
+      { username, email, role },
       { headers: authHeader() }
     );
   }

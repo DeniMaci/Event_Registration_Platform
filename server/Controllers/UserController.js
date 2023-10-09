@@ -27,7 +27,7 @@ exports.createUser = (req, res) => {
 // Edit an existing user by ID
 exports.editUser = (req, res) => {
   const userId = req.params.id; // Assuming you receive the user ID in the request parameters
-  const { username, email, password, role } = req.body;
+  const { username, email, role } = req.body;
   User.findByPk(userId)
     .then((user) => {
       if (!user) {
@@ -37,7 +37,6 @@ exports.editUser = (req, res) => {
       // Update user fields
       user.username = username;
       user.email = email;
-      user.password = bcrypt.hashSync(password, 8); 
       user.roleId = role; 
 
       // Save the updated user

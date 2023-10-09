@@ -19,6 +19,7 @@ import UserCreate from "./Components/User/UserCreate";
 import UserEdit from "./Components/User/UserEdit";
 
 import EventBus from "./Shared/EventBus";
+import HomePage from "./Components/HomePage";
 
 class App extends Component {
   constructor(props) {
@@ -72,7 +73,7 @@ class App extends Component {
           </Link>
           <div className="navbar-nav mr-auto">
             <li className="nav-item">
-              <Link to={"/home"} className="nav-link">
+              <Link to={"/"} className="nav-link">
                 Home
               </Link>
             </li>
@@ -129,6 +130,7 @@ class App extends Component {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/" element={<HomePage />} />
             {currentUser && (
             <Route path="/events" element={<EventList />} />
             )}
