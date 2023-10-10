@@ -3,6 +3,7 @@ import UserService from "../../Services/UserService";
 import { withRouter } from "../../Shared/with-router";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
+import { isEmail } from "validator"; // Import validation functions
 
 class UserEdit extends Component {
   constructor(props) {
@@ -12,7 +13,6 @@ class UserEdit extends Component {
     this.onChangeRole = this.onChangeRole.bind(this);
     this.getUser = this.getUser.bind(this);
     this.updateUser = this.updateUser.bind(this);
-    this.deleteUser = this.deleteUser.bind(this);
 
     this.state = {
       currentUser: {
@@ -23,12 +23,31 @@ class UserEdit extends Component {
         role: "",
       },
       message: "",
+      initialUsername: "", // Store the initial username
+      initialEmail: "", // Store the initial email
+      errors: {
+        username: "",
+        email: "",
+      }, // Add errors object for validation errors
+      existingUsernames: [], // Array to store existing usernames
+      existingEmails: [], // Array to store existing emails
     };
   }
 
   componentDidMount() {
     const { router } = this.props;
     const userId = router.params.id;
+
+    // Fetch existing usernames and emails and store them in state
+    UserService.getAllUsers()
+      .then((response) => {
+        const existingUsernames = response.data.map((user) => user.username);
+        const existingEmails = response.data.map((user) => user.email);
+        this.setState({ existingUsernames, existingEmails });
+      })
+      .catch((e) => {
+        console.log(e);
+      });
 
     this.getUser(userId);
   }
@@ -70,12 +89,15 @@ class UserEdit extends Component {
   getUser(id) {
     UserService.getUser(id)
       .then((response) => {
+        const { username, email } = response.data;
         this.setState((prevState) => ({
           currentUser: {
             ...prevState.currentUser,
             ...response.data,
             roleId: response.data.roleId, // Set the role from roleId
           },
+          initialUsername: username, // Store the initial username
+          initialEmail: email, // Store the initial email
         }));
       })
       .catch((e) => {
@@ -85,55 +107,59 @@ class UserEdit extends Component {
 
   updateUser() {
     const { navigate } = this.props.router;
+    const { initialUsername, initialEmail } = this.state
     const { id, username, email, roleId } = this.state.currentUser;
-    confirmAlert({
-      title: "Confirm Update",
-      message: "Are you sure you want to update this user?",
-      buttons: [
-        {
-          label: "Yes",
-          onClick: () => {
-            UserService.editUser(id, username, email, roleId)
-              .then((response) => {
-                console.log(response.data);
-                navigate("/users"); // Navigate back to the user list page
-              })
-              .catch((e) => {
-                console.log(e);
-              });
-          },
-        },
-        {
-          label: "No",
-          onClick: () => {},
-        },
-      ],
-    });
-  }
 
-  deleteUser(userId) {
-    confirmAlert({
-      title: "Confirm Deletion",
-      message: "Are you sure you want to delete this user?",
-      buttons: [
-        {
-          label: "Yes",
-          onClick: () => {
-            UserService.deleteUser(userId)
-              .then(() => {
-                this.fetchUsers();
-              })
-              .catch((error) => {
-                console.error("Error deleting user:", error);
-              });
+    // Client-side validation
+    const errors = {};
+    
+    // Check if the user has made any changes to username or email
+    if (username !== initialUsername) {
+      if (!username || username.length < 3) {
+        errors.username = "Username must be at least 3 characters long";
+      }
+      if (this.state.existingUsernames.includes(username)) {
+        errors.username = "Username is already in use";
+      }
+    }
+
+    if (email !== initialEmail) {
+      if (!isEmail(email)) {
+        errors.email = "Invalid email format";
+      }
+      if (this.state.existingEmails.includes(email)) {
+        errors.email = "Email is already in use";
+      }
+    }
+
+    this.setState({ errors });
+
+    if (Object.values(errors).every((error) => !error)) {
+      // No validation errors, proceed with update
+      confirmAlert({
+        title: "Confirm Update",
+        message: "Are you sure you want to update this user?",
+        buttons: [
+          {
+            label: "Yes",
+            onClick: () => {
+              UserService.editUser(id, username, email, roleId)
+                .then((response) => {
+                  console.log(response.data);
+                  navigate("/users"); // Navigate back to the user list page
+                })
+                .catch((e) => {
+                  console.log(e);
+                });
+            },
           },
-        },
-        {
-          label: "No",
-          onClick: () => {},
-        },
-      ],
-    });
+          {
+            label: "No",
+            onClick: () => {},
+          },
+        ],
+      });
+    }
   }
 
   // Helper function to get role name by roleId
@@ -151,7 +177,7 @@ class UserEdit extends Component {
   }
 
   render() {
-    const { currentUser } = this.state;
+    const { currentUser, errors } = this.state;
     return (
       <div>
         {currentUser ? (
@@ -162,21 +188,27 @@ class UserEdit extends Component {
                 <label htmlFor="username">Username</label>
                 <input
                   type="text"
-                  className="form-control"
+                  className={`form-control ${errors.username ? "is-invalid" : ""}`}
                   id="username"
                   value={currentUser.username}
                   onChange={this.onChangeUsername}
                 />
+                {errors.username && (
+                  <div className="invalid-feedback">{errors.username}</div>
+                )}
               </div>
               <div className="form-group">
                 <label htmlFor="email">Email</label>
                 <input
                   type="email"
-                  className="form-control"
+                  className={`form-control ${errors.email ? "is-invalid" : ""}`}
                   id="email"
                   value={currentUser.email}
                   onChange={this.onChangeEmail}
                 />
+                {errors.email && (
+                  <div className="invalid-feedback">{errors.email}</div>
+                )}
               </div>
               <div className="form-group">
                 <label htmlFor="role">Role</label>
@@ -198,12 +230,6 @@ class UserEdit extends Component {
               onClick={() => this.updateUser()}
             >
               Update
-            </button>
-            <button
-              className="btn btn-danger"
-              onClick={() => this.deleteUser(currentUser.id)}
-            >
-              Delete
             </button>
             <p>{this.state.message}</p>
           </div>
