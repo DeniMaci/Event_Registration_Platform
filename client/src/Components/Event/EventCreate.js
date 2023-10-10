@@ -14,14 +14,54 @@ class EventCreate extends Component {
       location: '',
       successful: false,
       message: '',
+      errors: {
+        eventName: '',
+        date: '',
+        location: '',
+      },
     };
   }
 
   handleChange = (event) => {
-    this.setState({ [event.target.name]: event.target.value });
+    const { name, value } = event.target;
+    this.setState({
+      [name]: value,
+    });
+  };
+
+  validateFields = () => {
+    const { eventName, date, location } = this.state;
+    const errors = {
+      eventName: '',
+      date: '',
+      location: '',
+    };
+    let isValid = true;
+
+    if (!eventName) {
+      errors.eventName = 'Event name is required';
+      isValid = false;
+    }
+
+    if (!date) {
+      errors.date = 'Date is required';
+      isValid = false;
+    }
+
+    if (!location) {
+      errors.location = 'Location is required';
+      isValid = false;
+    }
+
+    this.setState({ errors });
+    return isValid;
   };
 
   handleCreateEvent = () => {
+    if (!this.validateFields()) {
+      return;
+    }
+
     const { eventName, description, date, location } = this.state;
     const { navigate } = this.props.router;
     confirmAlert({
@@ -68,9 +108,12 @@ class EventCreate extends Component {
               name="eventName"
               value={this.state.eventName}
               onChange={this.handleChange}
-              className="form-control"
+              className={`form-control ${this.state.errors.eventName ? 'is-invalid' : ''}`}
               required
             />
+            {this.state.errors.eventName && (
+              <div className="invalid-feedback">{this.state.errors.eventName}</div>
+            )}
           </div>
           <div className="form-group">
             <label>Description</label>
@@ -88,9 +131,12 @@ class EventCreate extends Component {
               name="date"
               value={this.state.date}
               onChange={this.handleChange}
-              className="form-control"
+              className={`form-control ${this.state.errors.date ? 'is-invalid' : ''}`}
               required
             />
+            {this.state.errors.date && (
+              <div className="invalid-feedback">{this.state.errors.date}</div>
+            )}
           </div>
           <div className="form-group">
             <label>Location</label>
@@ -99,15 +145,19 @@ class EventCreate extends Component {
               name="location"
               value={this.state.location}
               onChange={this.handleChange}
-              className="form-control"
+              className={`form-control ${this.state.errors.location ? 'is-invalid' : ''}`}
               required
             />
+            {this.state.errors.location && (
+              <div className="invalid-feedback">{this.state.errors.location}</div>
+            )}
           </div>
           <div>
             <button
               type="button"
               className="btn btn-success"
-              onClick={this.handleCreateEvent}>
+              onClick={this.handleCreateEvent}
+            >
               Create Event
             </button>
           </div>

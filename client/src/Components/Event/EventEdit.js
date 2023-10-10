@@ -13,7 +13,6 @@ class EditEvent extends Component {
     this.onChangeLocation = this.onChangeLocation.bind(this);
     this.getEvent = this.getEvent.bind(this);
     this.updateEvent = this.updateEvent.bind(this);
-    this.deleteEvent = this.deleteEvent.bind(this);
 
     this.state = {
       currentEvent: {
@@ -23,7 +22,17 @@ class EditEvent extends Component {
         date: "",
         location: ""
       },
-      message: ""
+      message: "",
+      initialEventName: "", // Store the initial event name
+      initialDescription: "", // Store the initial description
+      initialDate: "", // Store the initial date
+      initialLocation: "", // Store the initial location
+      errors: {
+        eventName: "",
+        description: "",
+        date: "",
+        location: "",
+      }, // Add errors object for validation errors
     };
   }
 
@@ -41,7 +50,7 @@ class EditEvent extends Component {
       currentEvent: {
         ...prevState.currentEvent,
         eventName: eventName
-      }
+      },
     }));
   }
 
@@ -52,7 +61,7 @@ class EditEvent extends Component {
       currentEvent: {
         ...prevState.currentEvent,
         description: description
-      }
+      },
     }));
   }
 
@@ -63,7 +72,7 @@ class EditEvent extends Component {
       currentEvent: {
         ...prevState.currentEvent,
         date: date
-      }
+      },
     }));
   }
 
@@ -74,7 +83,7 @@ class EditEvent extends Component {
       currentEvent: {
         ...prevState.currentEvent,
         location: location
-      }
+      },
     }));
   }
 
@@ -82,7 +91,11 @@ class EditEvent extends Component {
     EventService.getEvent(id)
       .then(response => {
         this.setState({
-          currentEvent: response.data
+          currentEvent: response.data,
+          initialEventName: response.data.eventName,
+          initialDescription: response.data.description,
+          initialDate: response.data.date,
+          initialLocation: response.data.location,
         });
       })
       .catch(e => {
@@ -92,65 +105,75 @@ class EditEvent extends Component {
 
   updateEvent() {
     const { navigate } = this.props.router;
-    confirmAlert({
-      title: "Confirm Update",
-      message: "Are you sure you want to update this event?",
-      buttons: [
-        {
-          label: "Yes",
-          onClick: () => {
-            EventService.editEvent(
-              this.state.currentEvent.id,
-              this.state.currentEvent.eventName,
-              this.state.currentEvent.description,
-              this.state.currentEvent.date,
-              this.state.currentEvent.location
-            )
-            .then((response) => {
-              console.log(response.data);
-              // Assuming this component is rendered within a Route component
-              navigate("/events"); // Navigate back to the event list page
-            })
-              .catch((e) => {
-                console.log(e);
-              });
-          },
-        },
-        {
-          label: "No",
-          onClick: () => { }
-        },
-      ],
-    });
-  }
+    const { id, eventName, description, date, location, initialEventName, initialDescription, initialDate, initialLocation } = this.state.currentEvent;
 
-  deleteEvent(eventId) {
-    confirmAlert({
-      title: "Confirm Deletion",
-      message: "Are you sure you want to delete this event?",
-      buttons: [
-        {
-          label: "Yes",
-          onClick: () => {
-            EventService.deleteEvent(eventId)
-              .then(() => {
-                this.fetchEvents();
-              })
-              .catch((error) => {
-                console.error("Error deleting event:", error);
-              });
+    // Client-side validation
+    const errors = {};
+    
+    // Check if the user has made any changes to event properties
+    if (eventName !== initialEventName) {
+      if (!eventName) {
+        errors.eventName = "Event name is required";
+      }
+    }
+    
+    if (description !== initialDescription) {
+      if (!description) {
+        errors.description = "Description is required";
+      }
+    }
+
+    if (date !== initialDate) {
+      if (!date) {
+        errors.date = "Date is required";
+      }
+    }
+
+    if (location !== initialLocation) {
+      if (!location) {
+        errors.location = "Location is required";
+      }
+    }
+
+    this.setState({ errors });
+
+    if (Object.values(errors).every(error => !error)) {
+      // No validation errors, proceed with update
+      confirmAlert({
+        title: "Confirm Update",
+        message: "Are you sure you want to update this event?",
+        buttons: [
+          {
+            label: "Yes",
+            onClick: () => {
+              EventService.editEvent(
+                id,
+                eventName,
+                description,
+                date,
+                location
+              )
+                .then(response => {
+                  console.log(response.data);
+                  // Assuming this component is rendered within a Route component
+                  navigate("/events"); // Navigate back to the event list page
+                })
+                .catch(e => {
+                  console.log(e);
+                });
+            },
           },
-        },
-        {
-          label: "No",
-          onClick: () => { }
-        },
-      ],
-    });
+          {
+            label: "No",
+            onClick: () => {}
+          },
+        ],
+      });
+    }
   }
 
   render() {
-    const { currentEvent } = this.state;
+    const { currentEvent, errors } = this.state;
 
     return (
       <div>
@@ -162,48 +185,57 @@ class EditEvent extends Component {
                 <label htmlFor="eventName">Event Name</label>
                 <input
                   type="text"
-                  className="form-control"
+                  className={`form-control ${errors.eventName ? "is-invalid" : ""}`}
                   id="eventName"
                   value={currentEvent.eventName}
                   onChange={this.onChangeEventName}
                 />
+                {errors.eventName && (
+                  <div className="invalid-feedback">{errors.eventName}</div>
+                )}
               </div>
               <div className="form-group">
                 <label htmlFor="description">Description</label>
                 <input
                   type="text"
-                  className="form-control"
+                  className={`form-control ${errors.description ? "is-invalid" : ""}`}
                   id="description"
                   value={currentEvent.description}
                   onChange={this.onChangeDescription}
                 />
+                {errors.description && (
+                  <div className="invalid-feedback">{errors.description}</div>
+                )}
               </div>
               <div className="form-group">
                 <label htmlFor="date">Date</label>
                 <input
                   type="date"
-                  className="form-control"
+                  className={`form-control ${errors.date ? "is-invalid" : ""}`}
                   id="date"
                   value={currentEvent.date}
                   onChange={this.onChangeDate}
                 />
+                {errors.date && (
+                  <div className="invalid-feedback">{errors.date}</div>
+                )}
               </div>
               <div className="form-group">
                 <label htmlFor="location">Location</label>
                 <input
                   type="text"
-                  className="form-control"
+                  className={`form-control ${errors.location ? "is-invalid" : ""}`}
                   id="location"
                   value={currentEvent.location}
                   onChange={this.onChangeLocation}
                 />
+                {errors.location && (
+                  <div className="invalid-feedback">{errors.location}</div>
+                )}
               </div>
             </form>
             <button className="btn btn-warning" onClick={() => this.updateEvent()} >
               Update
-            </button>
-            <button className="btn btn-danger"  onClick={ this.deleteEvent } >
-              Delete
             </button>
             <p>{this.state.message}</p>
           </div>
