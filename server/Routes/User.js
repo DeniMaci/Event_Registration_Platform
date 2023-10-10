@@ -21,14 +21,15 @@ module.exports = function(app) {
   // Edit a user by ID
   app.put(
     "/api/users/:id",
-    [authJwt.verifyToken, authJwt.isAdmin], // Add any necessary middleware for validation and authorization
+    [authJwt.verifyToken, authJwt.isAdmin],
+    [verifySignUp.checkRolesExisted],
     UserController.editUser
   );
 
   // Delete a user by ID
   app.delete(
     "/api/users/:id",
-    [authJwt.verifyToken, authJwt.isAdmin], // Add any necessary middleware for validation and authorization
+    [authJwt.verifyToken, authJwt.isAdmin],
     UserController.deleteUser
   );
 

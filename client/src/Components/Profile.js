@@ -59,6 +59,11 @@ export default class Profile extends Component {
     }));
   };
 
+  // Validation function for new password
+  validateNewPassword = (newPassword) => {
+    return newPassword.length >= 6;
+  };
+
   // Handle input changes
   handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -78,6 +83,14 @@ export default class Profile extends Component {
     if (!currentUser.username || !currentUser.email) {
       this.setState({
         message: "Username and Email are required fields.",
+      });
+      return;
+    }
+
+    // Validate the new password length
+    if (currentUser.newPassword && !this.validateNewPassword(currentUser.newPassword)) {
+      this.setState({
+        message: "New Password must be at least 6 characters long.",
       });
       return;
     }

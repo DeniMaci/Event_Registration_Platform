@@ -3,37 +3,26 @@ import UserService from '../../Services/UserService';
 import { withRouter } from '../../Shared/with-router';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+
+const validationSchema = Yup.object().shape({
+  username: Yup.string().required('Username is required').min(3, 'Username must be at least 3 characters'),
+  email: Yup.string().required('Email is required').email('Invalid email format'),
+  password: Yup.string().required('Password is required').min(6, 'Password must be at least 6 characters'),
+  roleId: Yup.string().required('Role is required'),
+});
 
 class UserCreate extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      username: '',
-      email: '',
-      password: '',
-      roleId: 1, // Default role is 'User'
-      role: 'User', // Default role name is 'User'
       successful: false,
       message: '',
     };
   }
 
-  handleChange = (event) => {
-    const { name, value } = event.target;
-    this.setState({ [name]: value });
-  };
-
-  handleRoleChange = (e) => {
-    const roleId = e.target.value; // Get the selected roleId
-    const roleName = this.getRoleNameById(roleId);
-    this.setState({
-      roleId: roleId, // Set the selected roleId
-      role: roleName, // Include role name for display
-    });
-  };
-
-  handleCreateUser = () => {
-    const { username, email, password, roleId } = this.state;
+  handleCreateUser = (values, { setSubmitting }) => {
     const { navigate } = this.props.router;
     confirmAlert({
       title: 'Confirm User Creation',
@@ -42,116 +31,114 @@ class UserCreate extends Component {
         {
           label: 'Yes',
           onClick: () => {
-            UserService.createUser(username, email, password, roleId)
+            UserService.createUser(values.username, values.email, values.password, values.roleId)
               .then(() => {
                 this.setState({
                   successful: true,
                   message: 'User created successfully!',
                 });
-                // Assuming this component is rendered within a Route component
-                navigate('/users'); // Navigate back to the user list page
+                navigate('/users');
               })
               .catch((error) => {
                 this.setState({
                   successful: false,
                   message: error.response.data.message,
                 });
+              })
+              .finally(() => {
+                setSubmitting(false); // Reset isSubmitting to false
               });
           },
         },
         {
           label: 'No',
-          onClick: () => {},
+          onClick: () => {
+          setSubmitting(false);
+        }
         },
       ],
     });
   };
 
-  // Helper function to get role name by roleId
-  getRoleNameById(roleId) {
-    switch (roleId) {
-      case '1':
-        return 'User';
-      case '2':
-        return 'Organizer';
-      case '3':
-        return 'Admin';
-      default:
-        return '';
-    }
-  }
-
   render() {
     return (
       <div>
         <h1>Create User</h1>
-        <form>
-          <div className="form-group">
-            <label>Username</label>
-            <input
-              type="text"
-              name="username"
-              value={this.state.username}
-              onChange={this.handleChange}
-              className="form-control"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Email</label>
-            <input
-              type="email"
-              name="email"
-              value={this.state.email}
-              onChange={this.handleChange}
-              className="form-control"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Password</label>
-            <input
-              type="password"
-              name="password"
-              value={this.state.password}
-              onChange={this.handleChange}
-              className="form-control"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="role">Role</label>
-            <select
-              type="text"
-              className="form-control"
-              id="role"
-              value={this.state.roleId}
-              onChange={this.handleRoleChange}
-            >
-              <option value="1">User</option>
-              <option value="2">Organizer</option>
-              <option value="3">Admin</option>
-            </select>
-          </div>
-          <div>
-            <button
-              type="button"
-              className="btn btn-success"
-              onClick={this.handleCreateUser}
-            >
-              Create User
-            </button>
-          </div>
-          {this.state.message && (
-            <div
-              className={
-                this.state.successful ? 'alert alert-success' : 'alert alert-danger'
-              }
-            >
-              {this.state.message}
-            </div>
+        <Formik
+          initialValues={{
+            username: '',
+            email: '',
+            password: '',
+            roleId: '1', // Set the default role here
+          }}
+          validationSchema={validationSchema}
+          onSubmit={(values, { setSubmitting }) => {
+            this.handleCreateUser(values, { setSubmitting });
+          }}
+        >
+          {({ isSubmitting }) => (
+            <Form>
+              <div className="form-group">
+                <label>Username</label>
+                <Field
+                  type="text"
+                  name="username"
+                  className="form-control"
+                />
+                <ErrorMessage name="username" component="div" className="text-danger" />
+              </div>
+              <div className="form-group">
+                <label>Email</label>
+                <Field
+                  type="email"
+                  name="email"
+                  className="form-control"
+                />
+                <ErrorMessage name="email" component="div" className="text-danger" />
+              </div>
+              <div className="form-group">
+                <label>Password</label>
+                <Field
+                  type="password"
+                  name="password"
+                  className="form-control"
+                />
+                <ErrorMessage name="password" component="div" className="text-danger" />
+              </div>
+              <div className="form-group">
+                <label htmlFor="role">Role</label>
+                <Field
+                  as="select"
+                  name="roleId"
+                  className="form-control"
+                >
+                  <option value="1">User</option>
+                  <option value="2">Organizer</option>
+                  <option value="3">Admin</option>
+                </Field>
+                <ErrorMessage name="roleId" component="div" className="text-danger" />
+              </div>
+              <div>
+                <button
+                  type="submit"
+                  className="btn btn-success"
+                  disabled={isSubmitting}
+                >
+                  Create User
+                </button>
+              </div>
+              {this.state.message && (
+                <div
+                  className={
+                    this.state.successful ? 'alert alert-success' : 'alert alert-danger'
+                  }
+                >
+                  {this.state.message}
+                </div>
+              )}
+            </Form>
           )}
-        </form>
+        </Formik>
       </div>
     );
   }
