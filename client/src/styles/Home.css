@@ -1,0 +1,15 @@
+/* Home.css */
+
+/* Center-align text */
+.text-center {
+    text-align: center;
+  }
+  
+  /* Project title */
+  .project-title {
+    font-size: 32px;
+    font-weight: bold;
+    margin: 20px 0;
+    color: #0074E4; /* Change title color to blue */
+  }
+  

@@ -1,0 +1,108 @@
+/* EventList.css */
+
+/* Event List container styles */
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+/* Search input styles */
+.input-group {
+  margin-bottom: 20px;
+}
+
+.list-group {
+  width: 100%;
+  display: block;
+}
+
+.input-group input[type="text"] {
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  margin-right: 20px;
+}
+
+.input-group .btn {
+  padding: 12px 25px; /* Increase padding for height */
+  border-radius: 50px; /* Make rounded ends */
+  background-color: #0074E4;
+  color: #fff;
+}
+
+.list-group-item {
+  margin: 10px; /* Add margin for spacing */
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 10px; /* Add round ends */
+  padding: 15px;
+  width: 30%; /* Fixed width for each item */
+  height: 300px; /* Fixed height for each item */
+  display: inline-block; /* Display as inline block */
+}
+
+
+/* Register button styles */
+.list-group-item .btn-primary {
+  background-color: #0074E4;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+/* Admin controls and Attendees styles */
+.list-group-item .btn-danger {
+  background-color: #DC3545;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.list-group-item .btn-warning {
+  background-color: #FFC107;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.list-group-item h5 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 20px;
+  width: 30%;
+}
+
+.list-group-item ul {
+  list-style: none;
+  padding: 0;
+}
+
+.list-group-item li {
+  margin-top: 5px;
+  font-size: 16px;
+}
+
+/* Alert styles */
+.alert-info {
+  background-color: #0074E4;
+  color: #fff;
+  border-radius: 4px;
+  padding: 15px;
+  margin-top: 20px;
+}
+
+.alert-info a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.alert-info a:hover {
+  text-decoration: underline;
+}

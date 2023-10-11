@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import AuthService from "../Services/AuthService";
-
+import "../styles/Home.css"
 class HomePage extends Component {
   constructor(props) {
     super(props);
@@ -16,7 +16,7 @@ class HomePage extends Component {
       <div className="container">
         <div className="row">
           <div className="col-md-12">
-            <h1>Welcome {currentUser ? currentUser.username : "Guest"}!</h1>
+            <h1 class="project-title">Welcome {currentUser ? currentUser.username : "Guest"}!</h1>
           </div>
         </div>
       </div>
