@@ -5,6 +5,7 @@ import UserService from "../../Services/UserService";
 import { Link } from "react-router-dom";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
+import Modal from "react-modal"; // Import Modal
 import "../../styles/Events/EventList.css";
 
 class EventList extends Component {
@@ -15,7 +16,10 @@ class EventList extends Component {
       searchTitle: "",
       currentUser: AuthService.getCurrentUser(),
       attendeesData: {},
-      attendeesDropdown: null, // Store the event ID for the currently open attendees dropdown
+      usersData: {},
+      expandedEventId: null,
+      showAttendeesModal: false, // For showing attendees in a modal
+      selectedEventId: null, // To keep track of the selected event
     };
   }
 
@@ -202,15 +206,24 @@ class EventList extends Component {
     this.setState({ searchTitle: e.target.value });
   }
 
-  // Toggle attendees dropdown for an event
-  toggleAttendeesDropdown(eventId) {
-    this.setState((prevState) => ({
-      attendeesDropdown: prevState.attendeesDropdown === eventId ? null : eventId,
-    }));
+  // Toggle event attendees and show modal
+  toggleEventAttendees(eventId) {
+    this.setState({
+      showAttendeesModal: true,
+      selectedEventId: eventId,
+    });
+  }
+
+  // Close attendees modal
+  closeAttendeesModal() {
+    this.setState({
+      showAttendeesModal: false,
+      selectedEventId: null,
+    });
   }
 
   render() {
-    const { events, searchTitle, currentUser, attendeesData, usersData, attendeesDropdown } = this.state;
+    const { events, searchTitle, currentUser, attendeesData, usersData, selectedEventId } = this.state;
 
     const filteredEvents = events.filter((event) =>
       event.eventName.toLowerCase().includes(searchTitle.toLowerCase())
@@ -252,35 +265,6 @@ class EventList extends Component {
                         Register
                       </button>
                     )}
-                    {/* Button to toggle attendees dropdown */}
-                    <button className="btn btn-secondary" onClick={() => this.toggleAttendeesDropdown(event.id)}>
-                      {attendeesDropdown === event.id ? "Hide Attendees" : "Show Attendees"}
-                    </button>
-                    {/* Attendees dropdown */}
-                    {attendeesDropdown === event.id && (
-                      <div className="dropdown">
-                        <button
-                          className="btn btn-secondary dropdown-toggle"
-                          type="button"
-                          id={`attendeesDropdown-${event.id}`}
-                          data-toggle="dropdown"
-                          aria-haspopup="true"
-                          aria-expanded="false"
-                        >
-                          Attendees
-                        </button>
-                        <div className="dropdown-menu" aria-labelledby={`attendeesDropdown-${event.id}`}>
-                          {attendeesData[event.id] &&
-                            attendeesData[event.id].map((attendee) => (
-                              <p key={attendee.userId} className="dropdown-item">
-                                {usersData[attendee.userId]
-                                  ? usersData[attendee.userId].username
-                                  : "Unknown User"}
-                              </p>
-                            ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               ))}
@@ -306,17 +290,12 @@ class EventList extends Component {
                         Edit
                       </Link>
                     </div>
-                    <h5>Attendees:</h5>
-                    <ul>
-                      {attendeesData[event.id] &&
-                        attendeesData[event.id].map((attendee) => (
-                          <li key={attendee.userId}>
-                            {usersData[attendee.userId]
-                              ? usersData[attendee.userId].username
-                              : "Unknown User"}
-                          </li>
-                        ))}
-                    </ul>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => this.toggleEventAttendees(event.id)}
+                    >
+                      Attendees
+                    </button>
                   </div>
                 )}
                 {this.isEventOrganizer() && event.organizerId === currentUser.id && (
@@ -329,17 +308,12 @@ class EventList extends Component {
                         Edit
                       </Link>
                     </div>
-                    <h5>Attendees:</h5>
-                    <ul>
-                      {attendeesData[event.id] &&
-                        attendeesData[event.id].map((attendee) => (
-                          <li key={attendee.userId}>
-                            {usersData[attendee.userId]
-                              ? usersData[attendee.userId].username
-                              : "Unknown User"}
-                          </li>
-                        ))}
-                    </ul>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => this.toggleEventAttendees(event.id)}
+                    >
+                      Attendees
+                    </button>
                   </div>
                 )}
               </li>
@@ -352,6 +326,34 @@ class EventList extends Component {
             Please <Link to="/login">login</Link> to view and register for events.
           </div>
         )}
+
+        {/* Modal for Attendees */}
+        <Modal
+          isOpen={this.state.showAttendeesModal}
+          onRequestClose={() => this.closeAttendeesModal()}
+          contentLabel="Attendees Modal"
+          ariaHideApp={false}
+          className="attendees-modal"
+          overlayClassName="modal-overlay" // Apply overlay styles
+        >
+          {selectedEventId && attendeesData[selectedEventId] ? (
+            <div>
+              <h3>Attendees for this event:</h3>
+              <ul>
+                {attendeesData[selectedEventId].map((attendee) => (
+                  <li key={attendee.userId}>
+                    {usersData[attendee.userId]
+                      ? usersData[attendee.userId].username
+                      : "Unknown User"}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p>There are still no attendees for this event</p>
+          )}
+          <button onClick={() => this.closeAttendeesModal()}>Close</button>
+        </Modal>
       </div>
     );
   }

@@ -4,7 +4,7 @@ import Input from "react-validation/build/input";
 import CheckButton from "react-validation/build/button";
 
 import AuthService from "../../Services/AuthService";
-
+import "../../styles/Auth/Login.css"
 import { withRouter } from '../../Shared/with-router';
 
 const required = value => {
@@ -83,7 +83,7 @@ class Login extends Component {
 
   render() {
     return (
-      <div className="col-md-12">
+      <div className="container">
         <div className="card card-container">
           <img
             src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
@@ -98,7 +98,7 @@ class Login extends Component {
             }}
           >
             <div className="form-group">
-              <label htmlFor="username">Username</label>
+              <label htmlFor="username" className="text-primary">Username</label>
               <Input
                 type="text"
                 className="form-control"
@@ -110,7 +110,7 @@ class Login extends Component {
             </div>
 
             <div className="form-group">
-              <label htmlFor="password">Password</label>
+              <label htmlFor="password" className="text-primary">Password</label>
               <Input
                 type="password"
                 className="form-control"

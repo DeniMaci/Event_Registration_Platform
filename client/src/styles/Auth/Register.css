@@ -1,0 +1,33 @@
+/* Register.css */
+.card-container {
+    /* ... (previous styles) ... */
+  }
+  
+  .profile-img-card {
+    /* ... (previous styles) ... */
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  /* Change the label text color to blue */
+  label {
+    color: #0074E4;
+  }
+  
+  .form-control {
+    border-radius: 4px;
+  }
+  
+  .btn-primary {
+    background-color: #0074E4;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+  }
+  
+  .alert {
+    border-radius: 4px;
+  }
+  
