@@ -109,14 +109,14 @@ class EditEvent extends Component {
 
     // Client-side validation
     const errors = {};
-    
+
     // Check if the user has made any changes to event properties
     if (eventName !== initialEventName) {
       if (!eventName) {
         errors.eventName = "Event name is required";
       }
     }
-    
+
     if (description !== initialDescription) {
       if (!description) {
         errors.description = "Description is required";
@@ -165,7 +165,7 @@ class EditEvent extends Component {
           },
           {
             label: "No",
-            onClick: () => {}
+            onClick: () => { }
           },
         ],
       });

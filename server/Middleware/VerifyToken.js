@@ -25,7 +25,7 @@ verifyToken = (req, res, next) => {
 
 isAdmin = (req, res, next) => {
   User.findByPk(req.userId).then(user => {
-    if (user.roleId === 3 ) {
+    if (user.roleId === 3) {
       next();
     } else {
       res.status(403).send({
@@ -37,7 +37,7 @@ isAdmin = (req, res, next) => {
 
 isEventOrganizer = (req, res, next) => {
   User.findByPk(req.userId).then(user => {
-    if (user.roleId === 2 ) {
+    if (user.roleId === 2) {
       next();
     } else {
       res.status(403).send({
@@ -50,7 +50,7 @@ isEventOrganizer = (req, res, next) => {
 isEventOrganizerOrAdmin = (req, res, next) => {
   User.findByPk(req.userId).then(user => {
     if (user.roleId === 2 ||
-        user.roleId === 3 ) {
+      user.roleId === 3) {
       next();
     } else {
       res.status(403).send({

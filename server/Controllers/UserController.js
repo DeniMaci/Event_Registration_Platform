@@ -37,7 +37,7 @@ exports.editUser = (req, res) => {
       // Update user fields
       user.username = username;
       user.email = email;
-      user.roleId = role; 
+      user.roleId = role;
 
       // Save the updated user
       user

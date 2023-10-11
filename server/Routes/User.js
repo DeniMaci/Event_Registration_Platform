@@ -2,8 +2,8 @@ const { authJwt } = require("../Middleware");
 const { verifySignUp } = require("../Middleware");
 const UserController = require("../Controllers/UserController");
 
-module.exports = function(app) {
-  app.use(function(req, res, next) {
+module.exports = function (app) {
+  app.use(function (req, res, next) {
     res.header(
       "Access-Control-Allow-Headers",
       "x-access-token, Origin, Content-Type, Accept"
@@ -35,15 +35,15 @@ module.exports = function(app) {
 
   // Get a list of all users
   app.get(
-    "/api/users", 
-    [authJwt.verifyToken, authJwt.isAdmin], 
+    "/api/users",
+    [authJwt.verifyToken, authJwt.isAdmin],
     UserController.getAllUsers
-    );
+  );
 
   // Get a user by ID
   app.get(
-    "/api/users/:id", 
+    "/api/users/:id",
     [authJwt.verifyToken, authJwt.isEventOrganizerOrAdmin],
     UserController.getUserById
-    );
+  );
 };

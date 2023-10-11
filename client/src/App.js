@@ -131,14 +131,14 @@ class App extends Component {
             <Route path="/profile" element={<Profile />} />
             <Route path="/" element={<HomePage />} />
             {currentUser && (
-            <Route path="/events" element={<EventList />} />
+              <Route path="/events" element={<EventList />} />
             )}
             {(showAdminBoard || showEventOrganizerBoard) && (
-            <Route path="/events/create" element={<EventCreate />} />
-            )} 
+              <Route path="/events/create" element={<EventCreate />} />
+            )}
             {(showAdminBoard || showEventOrganizerBoard) && (
-            <Route path="/events/edit/:id" element={<EventEdit />} />
-            )} 
+              <Route path="/events/edit/:id" element={<EventEdit />} />
+            )}
             {showAdminBoard && (
               <Route path="/users" element={<UserList />} />
             )}

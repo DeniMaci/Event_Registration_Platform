@@ -1,7 +1,7 @@
 import express from "express"
 import { getAllUsers, deleteUser, editUser, createUser } from "../Controllers/UserController.js"
 import { createEvent, editEvent, deleteEvent, getAllEvents } from "../Controllers/EventController.js"
-import { login , register } from "../Controllers/AuthController.js"
+import { login, register } from "../Controllers/AuthController.js"
 import { verifyToken } from "../Middleware/VerifyToken.js"
 import { refreshToken } from "../Controllers/RefreshToken.js"
 

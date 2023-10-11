@@ -43,7 +43,7 @@ class AuthService {
       newPassword: newPassword, // Include the new password if changed
     }, { headers: authHeader() });
   }
-  
+
 }
 
 export default new AuthService();

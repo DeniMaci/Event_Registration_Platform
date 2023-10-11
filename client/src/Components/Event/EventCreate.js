@@ -90,7 +90,7 @@ class EventCreate extends Component {
         },
         {
           label: 'No',
-          onClick: () => {},
+          onClick: () => { },
         },
       ],
     });

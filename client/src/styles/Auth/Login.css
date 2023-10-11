@@ -1,33 +1,39 @@
 /* Login.css */
 .card-container {
-    max-width: 400px; /* Adjust the maximum width as needed */
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #fff; /* Set a background color */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .profile-img-card {
-    max-width: 100px; /* Set the maximum width for the profile image */
-    margin: 0 auto 20px;
-    border-radius: 50%; /* Make it a circle */
-    border: 2px solid #0074E4; /* Add a border with the primary color */
-  }
-  
-  .form-group {
-    margin-bottom: 20px;
-  }
-  
-  .form-control {
-    border-radius: 4px; /* Add border-radius to form inputs */
-  }
-  
-  .btn-primary {
-    background-color: #0074E4; /* Use the primary color for the button */
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-  }
-  
-  /* Additional styles can be added as needed for further customization */
-  
+  max-width: 400px;
+  /* Adjust the maximum width as needed */
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  /* Set a background color */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.profile-img-card {
+  max-width: 100px;
+  /* Set the maximum width for the profile image */
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  /* Make it a circle */
+  border: 2px solid #0074E4;
+  /* Add a border with the primary color */
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-control {
+  border-radius: 4px;
+  /* Add border-radius to form inputs */
+}
+
+.btn-primary {
+  background-color: #0074E4;
+  /* Use the primary color for the button */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+}
+
+/* Additional styles can be added as needed for further customization */

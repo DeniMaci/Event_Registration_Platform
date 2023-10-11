@@ -1,3 +1,3 @@
 module.exports = {
-    secret: "deni-maci-event-registration-platform"
-  };
+  secret: "deni-maci-event-registration-platform"
+};

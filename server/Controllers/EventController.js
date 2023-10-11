@@ -1,7 +1,6 @@
 const db = require("../Models");
 const Event = db.Event;
 const Attendee = db.Attendee;
-const User = db.User;
 
 // Create a new event
 exports.createEvent = (req, res) => {
@@ -91,7 +90,7 @@ exports.getAllEvents = (req, res) => {
     })
     .catch((err) => {
       res.status(500).json({ message: err.message });
-    });  
+    });
 };
 
 // Get an event by ID

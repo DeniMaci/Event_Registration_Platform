@@ -18,7 +18,7 @@ const db = require('./Models');
 const User = db.User;
 const Role = db.Role;
 
- db.sequelize.sync();
+db.sequelize.sync();
 // force: true will drop the table if it already exists
 // db.sequelize.sync({force: true}).then(() => {
 //     console.log('Drop and Resync Database with { force: true }');
@@ -40,12 +40,12 @@ function initial() {
     id: 1,
     name: "User"
   });
- 
+
   Role.create({
     id: 2,
     name: "Organizer"
   });
- 
+
   Role.create({
     id: 3,
     name: "Admin"

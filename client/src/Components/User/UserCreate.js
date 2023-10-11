@@ -53,8 +53,8 @@ class UserCreate extends Component {
         {
           label: 'No',
           onClick: () => {
-          setSubmitting(false);
-        }
+            setSubmitting(false);
+          }
         },
       ],
     });

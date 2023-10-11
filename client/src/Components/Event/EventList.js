@@ -159,7 +159,7 @@ class EventList extends Component {
         },
         {
           label: "No",
-          onClick: () => {},
+          onClick: () => { },
         },
       ],
     });
@@ -239,11 +239,6 @@ class EventList extends Component {
             value={searchTitle}
             onChange={(e) => this.handleSearchTitleChange(e)}
           />
-          <div className="input-group-append">
-            <button className="btn btn-primary" type="button">
-              Search
-            </button>
-          </div>
         </div>
 
         <div className="row">
@@ -334,25 +329,29 @@ class EventList extends Component {
           contentLabel="Attendees Modal"
           ariaHideApp={false}
           className="attendees-modal"
-          overlayClassName="modal-overlay" // Apply overlay styles
+          overlayClassName="modal-overlay"
         >
           {selectedEventId && attendeesData[selectedEventId] ? (
             <div>
-              <h3>Attendees for this event:</h3>
-              <ul>
-                {attendeesData[selectedEventId].map((attendee) => (
-                  <li key={attendee.userId}>
-                    {usersData[attendee.userId]
-                      ? usersData[attendee.userId].username
-                      : "Unknown User"}
-                  </li>
-                ))}
-              </ul>
+              <h2 className="attendees-title">Attendees for this event:</h2>
+              {attendeesData[selectedEventId].length > 0 ? (
+                <ul>
+                  {attendeesData[selectedEventId].map((attendee) => (
+                    <li key={attendee.userId}>
+                      {usersData[attendee.userId]
+                        ? usersData[attendee.userId].username
+                        : "Unknown User"}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="attendees-no-attendees">There are still no attendees for this event</p>
+              )}
             </div>
           ) : (
-            <p>There are still no attendees for this event</p>
+            <p className="attendees-no-attendees">There are still no attendees for this event</p>
           )}
-          <button onClick={() => this.closeAttendeesModal()}>Close</button>
+          <button className="btn btn-primary" onClick={() => this.closeAttendeesModal()}>Close</button>
         </Modal>
       </div>
     );

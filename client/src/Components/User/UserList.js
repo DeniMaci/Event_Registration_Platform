@@ -48,7 +48,7 @@ class UserList extends Component {
         },
         {
           label: "No",
-          onClick: () => {},
+          onClick: () => { },
         },
       ],
     });
@@ -60,7 +60,7 @@ class UserList extends Component {
 
   render() {
     const { users, searchTitle } = this.state;
-    
+
     const filteredUsers = users.filter((user) =>
       user.username.toLowerCase().includes(searchTitle.toLowerCase())
     );
@@ -76,11 +76,6 @@ class UserList extends Component {
               value={searchTitle}
               onChange={(e) => this.handleSearchTitleChange(e)}
             />
-            <div className="input-group-append">
-              <button className="btn btn-outline-secondary" type="button">
-                Search
-              </button>
-            </div>
           </div>
         </div>
 

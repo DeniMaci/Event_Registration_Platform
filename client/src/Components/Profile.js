@@ -102,8 +102,8 @@ export default class Profile extends Component {
           isEditing: false,
           currentUser: {
             ...currentUser,
-            currentPassword: "", 
-            newPassword: "", 
+            currentPassword: "",
+            newPassword: "",
           },
         });
       })

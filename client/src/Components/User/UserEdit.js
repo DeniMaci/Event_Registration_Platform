@@ -112,7 +112,7 @@ class UserEdit extends Component {
 
     // Client-side validation
     const errors = {};
-    
+
     // Check if the user has made any changes to username or email
     if (username !== initialUsername) {
       if (!username || username.length < 3) {
@@ -155,7 +155,7 @@ class UserEdit extends Component {
           },
           {
             label: "No",
-            onClick: () => {},
+            onClick: () => { },
           },
         ],
       });
