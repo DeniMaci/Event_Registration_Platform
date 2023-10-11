@@ -48,7 +48,7 @@ class UserList extends Component {
         },
         {
           label: "No",
-          onClick: () => { },
+          onClick: () => {},
         },
       ],
     });
@@ -67,7 +67,7 @@ class UserList extends Component {
 
     return (
       <div className="list row">
-        <div className="col-md-8">
+        <div className="col-md-12">
           <div className="input-group mb-3">
             <input
               type="text"
@@ -80,9 +80,11 @@ class UserList extends Component {
         </div>
 
         {/* User List */}
-        <div className="col-md-6">
+        <div className="col-md-12">
           <h4>User List</h4>
-          <Link to='/users/create' className="btn btn-success">Add</Link>
+          <Link to="/users/create" className="btn btn-success">
+            Add
+          </Link>
           <ul className="list-group">
             {filteredUsers.map((user) => (
               <li key={user.id} className="list-group-item">

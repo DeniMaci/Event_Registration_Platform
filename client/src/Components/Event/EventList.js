@@ -240,17 +240,23 @@ class EventList extends Component {
             onChange={(e) => this.handleSearchTitleChange(e)}
           />
         </div>
-
+        <div className="col-md-12">
+          <h4>Event List</h4>
+          {this.isEventOrganizerOrAdmin && (
+            <Link to="/events/create" className="btn btn-success">
+              Add
+            </Link>
+          )}
+        </div>
         <div className="row">
           {this.isUser() && (
-            <div className="d-flex flex-wrap justify-content-between">
+            <ul className="list-group">
               {filteredEvents.map((event) => (
-                <div key={event.id} className="col-md-4 mb-4">
-                  <div className="list-group-item">
-                    <h5 className="card-title">{event.eventName}</h5>
-                    <p className="card-text">{event.description}</p>
-                    <p className="card-text">Date: {new Date(event.date).toLocaleDateString()}</p>
-                    <p className="card-text">Location: {event.location}</p>
+                <li key={event.id} className="list-group-item">
+                    <h3>{event.eventName}</h3>
+                    <p>{event.description}</p>
+                    <p>Date: {new Date(event.date).toLocaleDateString()}</p>
+                    <p>Location: {event.location}</p>
                     {event.isRegistered ? (
                       <button className="btn btn-primary" disabled>
                         Registered
@@ -260,10 +266,9 @@ class EventList extends Component {
                         Register
                       </button>
                     )}
-                  </div>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
         </div>
 
