@@ -3,6 +3,7 @@ import EventService from "../../Services/EventService";
 import { withRouter } from '../../Shared/with-router';
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
+import "../../styles/Events/EventEdit.css"
 
 class EditEvent extends Component {
   constructor(props) {
@@ -179,7 +180,6 @@ class EditEvent extends Component {
       <div>
         {currentEvent ? (
           <div className="edit-form">
-            <h4>Edit Event</h4>
             <form>
               <div className="form-group">
                 <label htmlFor="eventName">Event Name</label>

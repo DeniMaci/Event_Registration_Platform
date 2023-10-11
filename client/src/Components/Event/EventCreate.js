@@ -98,8 +98,7 @@ class EventCreate extends Component {
 
   render() {
     return (
-      <div>
-        <h1>Create Event</h1>
+      <div className="edit-form">
         <form>
           <div className="form-group">
             <label>Event Name</label>

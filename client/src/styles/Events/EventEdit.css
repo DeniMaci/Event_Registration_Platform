@@ -1,0 +1,21 @@
+.edit-form {
+    display: inline-grid;
+    flex-direction: column;
+    width: 70%; /* Adjust the width as needed */
+  }
+  
+  .form-group {
+    margin-bottom: 40px;
+  }
+  
+  label {
+    order: -1; /* Move labels to the beginning of the flex container */
+    margin-right: 10px;
+    margin-bottom: 20px;
+    font-size: large;
+    font-weight: bold;
+  }
+  
+  input {
+    flex: 1; /* Allow input fields to take up the remaining space */
+  }

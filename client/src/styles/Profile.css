@@ -1,0 +1,46 @@
+/* Profile container */
+.profile-container {
+    text-align: center;
+    margin-top: 30px;
+  }
+  
+  /* Profile header */
+  .jumbotron {
+    background-color: #f8f9fa;
+    padding: 50px;
+  }
+  
+  /* Profile details */
+  .profile-details {
+    margin-bottom: 20px;
+  }
+  
+  /* Edit form container */
+  .edit-form {
+    text-align: left;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+  }
+  
+  /* Edit button container */
+  .edit-button {
+    margin-top: 20px;
+  }
+  
+  /* Button styles */
+  .btn-primary {
+    background-color: #007bff;
+    color: #fff;
+  }
+  
+  .btn-primary:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Alert message */
+  .alert {
+    margin-top: 20px;
+  }
+  

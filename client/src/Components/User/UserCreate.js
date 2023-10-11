@@ -62,8 +62,7 @@ class UserCreate extends Component {
 
   render() {
     return (
-      <div>
-        <h1>Create User</h1>
+      <div className="edit-form">
         <Formik
           initialValues={{
             username: '',

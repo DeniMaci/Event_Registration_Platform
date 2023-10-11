@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Navigate } from "react-router-dom";
 import AuthService from "../Services/AuthService";
+import "../styles/Profile.css"
 
 export default class Profile extends Component {
   constructor(props) {
@@ -134,11 +135,7 @@ export default class Profile extends Component {
               </h3>
             </header>
             <p>
-              <strong>Token:</strong>{" "}
-              {currentUser.accessToken.substring(0, 20)} ...{" "}
-              {currentUser.accessToken.substr(
-                currentUser.accessToken.length - 20
-              )}
+              <strong>Token:</strong> {currentUser.accessToken}
             </p>
             <p>
               <strong>Id:</strong> {currentUser.id}
@@ -152,8 +149,7 @@ export default class Profile extends Component {
             </p>
 
             {isEditing ? (
-              <div>
-                <h4>Edit Profile</h4>
+              <div className="edit-form" style={{ marginTop: "30px" }}>
                 <div className="form-group">
                   <label htmlFor="username">Username</label>
                   <input
