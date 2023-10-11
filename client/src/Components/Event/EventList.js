@@ -248,29 +248,27 @@ class EventList extends Component {
             </Link>
           )}
         </div>
-        <div className="row">
           {this.isUser() && (
             <ul className="list-group">
               {filteredEvents.map((event) => (
                 <li key={event.id} className="list-group-item">
-                    <h3>{event.eventName}</h3>
-                    <p>{event.description}</p>
-                    <p>Date: {new Date(event.date).toLocaleDateString()}</p>
-                    <p>Location: {event.location}</p>
-                    {event.isRegistered ? (
-                      <button className="btn btn-primary" disabled>
-                        Registered
-                      </button>
-                    ) : (
-                      <button className="btn btn-primary" onClick={() => this.handleRegisterClick(event.id)}>
-                        Register
-                      </button>
-                    )}
+                  <h3>{event.eventName}</h3>
+                  <p>{event.description}</p>
+                  <p>Date: {new Date(event.date).toLocaleDateString()}</p>
+                  <p>Location: {event.location}</p>
+                  {event.isRegistered ? (
+                    <button className="btn btn-primary" disabled>
+                      Registered
+                    </button>
+                  ) : (
+                    <button className="btn btn-primary" onClick={() => this.handleRegisterClick(event.id)}>
+                      Register
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
           )}
-        </div>
 
         {this.isEventOrganizerOrAdmin() && (
           <ul className="list-group">
@@ -292,6 +290,7 @@ class EventList extends Component {
                     </div>
                     <button
                       className="btn btn-secondary"
+                      style={{ marginTop: "10px" }}
                       onClick={() => this.toggleEventAttendees(event.id)}
                     >
                       Attendees
@@ -310,6 +309,7 @@ class EventList extends Component {
                     </div>
                     <button
                       className="btn btn-secondary"
+                      style={{ marginTop: "10px" }}
                       onClick={() => this.toggleEventAttendees(event.id)}
                     >
                       Attendees

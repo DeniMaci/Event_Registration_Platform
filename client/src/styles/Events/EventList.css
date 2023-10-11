@@ -48,6 +48,7 @@
   /* Fixed height for each item */
   display: inline-block;
   /* Display as inline block */
+  vertical-align: top;
 }
 
 /* Register button styles */
@@ -167,4 +168,8 @@ ul {
   /* Increase font size and add margin on top and bottom */
   font-size: 18px;
   margin: 20px 0;
+}
+
+.btn btn-secondary {
+  margin-top: 10px;
 }
