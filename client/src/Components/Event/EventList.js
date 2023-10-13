@@ -242,7 +242,7 @@ class EventList extends Component {
         </div>
         <div className="col-md-12">
           <h4>Event List</h4>
-          {this.isEventOrganizerOrAdmin && (
+          {this.isEventOrganizerOrAdmin() && (
             <Link to="/events/create" className="btn btn-success">
               Add
             </Link>
