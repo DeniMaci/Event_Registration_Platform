@@ -5,7 +5,7 @@ const dotenv = require('dotenv');
 dotenv.config(); // Load environment variables from .env file
 
 const sequelize = new Sequelize({
-  dialect: 'mssql',
+  dialect: 'mysql',
   server: process.env.DB_HOST,
   database: process.env.DB_NAME,
   username: process.env.DB_USERNAME,

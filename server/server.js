@@ -6,11 +6,7 @@ const bcrypt = require("bcryptjs");
 dotenv.config()
 const app = express()
 
-var corsOptions = {
-  origin: "http://localhost:4001"
-};
-
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 
@@ -18,12 +14,12 @@ const db = require('./Models');
 const User = db.User;
 const Role = db.Role;
 
-// db.sequelize.sync();
+db.sequelize.sync();
 // force: true will drop the table if it already exists
- db.sequelize.sync({force: true}).then(() => {
-     console.log('Drop and Resync Database with { force: true }');
-     initial();
-   });
+//  db.sequelize.sync({force: true}).then(() => {
+//      console.log('Drop and Resync Database with { force: true }');
+//      initial();
+//    });
 
 // routes
 require('./Routes/Auth.js')(app);
