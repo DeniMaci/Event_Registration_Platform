@@ -3,176 +3,133 @@ const Event = db.Event;
 const Attendee = db.Attendee;
 
 // Create a new event
-exports.createEvent = (req, res) => {
-  // Implement validation and authorization checks here
+exports.createEvent = async (req, res) => {
   const { eventName, description, date, location } = req.body;
-  const organizerId = req.userId; // Assuming you have a middleware to extract the user's ID from the token
-
-  Event.create({
-    eventName,
-    description,
-    date,
-    location,
-    organizerId,
-  })
-    .then((event) => {
-      res.status(201).json(event);
-    })
-    .catch((err) => {
-      res.status(500).json({ message: err.message });
+  const organizerId = req.userId;
+  try {
+    const event = await Event.create({
+      eventName,
+      description,
+      date,
+      location,
+      organizerId,
     });
+    return res.status(201).json(event);
+  }
+  catch (err) {
+    return res.status(500).json({ message: err.message });
+  };
 };
 
 // Edit an existing event by ID
-exports.editEvent = (req, res) => {
-  // Implement validation and authorization checks here
-  const eventId = req.params.id; // Assuming you receive the event ID in the request parameters
+exports.editEvent = async (req, res) => {
+  const eventId = req.params.id;
   const { eventName, description, date, location } = req.body;
-
-  Event.findByPk(eventId)
-    .then((event) => {
-      if (!event) {
-        return res.status(404).json({ message: "Event not found." });
-      }
-
-      // Update event fields
-      event.eventName = eventName;
-      event.description = description;
-      event.date = date;
-      event.location = location;
-
-      // Save the updated event
-      event
-        .save()
-        .then(() => {
-          res.status(200).json(event);
-        })
-        .catch((err) => {
-          res.status(500).json({ message: err.message });
-        });
-    })
-    .catch((err) => {
-      res.status(500).json({ message: err.message });
-    });
+  try {
+    const event = await Event.findByPk(eventId);
+    if (!event) {
+      return res.status(404).json({ message: "Event not found." });
+    }
+    // Update event fields
+    event.eventName = eventName;
+    event.description = description;
+    event.date = date;
+    event.location = location;
+    // Save the updated event
+    await event.save();
+    return res.status(200).json(event);
+  }
+  catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
 };
 
 // Delete an event by ID
-exports.deleteEvent = (req, res) => {
-  // Implement validation and authorization checks here
-  const eventId = req.params.id; // Assuming you receive the event ID in the request parameters
+exports.deleteEvent = async (req, res) => {
+  const eventId = req.params.id;
 
-  Event.findByPk(eventId)
-    .then((event) => {
-      if (!event) {
-        return res.status(404).json({ message: "Event not found." });
-      }
-
-      // Delete the event
-      event
-        .destroy()
-        .then(() => {
-          res.status(204).json(); // No content response for successful deletion
-        })
-        .catch((err) => {
-          res.status(500).json({ message: err.message });
-        });
-    })
-    .catch((err) => {
-      res.status(500).json({ message: err.message });
-    });
+  try {
+    const event = await Event.findByPk(eventId);
+    if (!event) {
+      return res.status(404).json({ message: "Event Not Found." });
+    }
+    // Delete the event
+    await event.destroy();
+    return res.status(204).json();
+  }
+  catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
 };
 
 // Get a list of all events
-exports.getAllEvents = (req, res) => {
-  Event.findAll()
-    .then((events) => {
-      res.status(200).json(events);
-    })
-    .catch((err) => {
-      res.status(500).json({ message: err.message });
-    });
+exports.getAllEvents = async (req, res) => {
+  try {
+    const events = await Event.findAll();
+    return res.status(200).json(events);
+  }
+  catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
 };
 
 // Get an event by ID
-exports.getEventById = (req, res) => {
-  const eventId = req.params.id; // Assuming you receive the event ID in the request parameters
+exports.getEventById = async (req, res) => {
+  const eventId = req.params.id;
+  try {
+    const event = await Event.findByPk(eventId);
+    if (!event) {
+      return res.status(404).json({ message: "Event Not Found." });
+    }
+    return res.status(200).json(event);
+  }
+  catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
 
-  Event.findByPk(eventId)
-    .then((event) => {
-      if (!event) {
-        return res.status(404).json({ message: "Event not found." });
-      }
+// Register for an event
+exports.registerForEvent = async (req, res) => {
+  const { eventId } = req.params;
+  const userId = req.userId;
+  try {
+    // Check if the user is already registered for the event
+    const existingAttendee = await Attendee.findOne({ where: { eventId, userId } });
+    if (existingAttendee)
+      return res.status(400).json({ message: "You are already registered for this event." });
+    await Attendee.create({ eventId, userId });
+    return res.status(201).json({ message: "Registration successful." });
+  }
+  catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
 
-      // Respond with the event data
-      res.status(200).json(event);
-    })
-    .catch((err) => {
-      res.status(500).json({ message: err.message });
-    });
+exports.isUserRegisteredForEvent = async (req, res) => {
+  const { eventId } = req.params;
+  const userId = req.userId;
+  try {
+    const existingAttendee = await Attendee.findOne({ where: { eventId, userId } });
+    if (existingAttendee)
+      return res.status(200).json({ isRegistered: true });
+    else
+      return res.status(200).json({ isRegistered: false });
+  }
+  catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
 };
 
 // EventController.js
-exports.registerForEvent = (req, res) => {
+exports.getEventAttendees = async (req, res) => {
   const { eventId } = req.params;
-  const userId = req.userId;
-
-  // Check if the user is already registered for the event
-  Attendee.findOne({
-    where: { eventId, userId },
-  })
-    .then((existingAttendee) => {
-      if (existingAttendee) {
-        return res
-          .status(400)
-          .json({ message: "You are already registered for this event." });
-      }
-
-      // Create a new Attendee entry
-      Attendee.create({ eventId, userId })
-        .then(() => {
-          res.status(201).json({ message: "Registration successful." });
-        })
-        .catch((err) => {
-          res.status(500).json({ message: err.message });
-        });
-    })
-    .catch((err) => {
-      res.status(500).json({ message: err.message });
-    });
-};
-
-exports.isUserRegisteredForEvent = (req, res) => {
-  const { eventId } = req.params;
-  const userId = req.userId;
-
-  Attendee.findOne({
-    where: { eventId, userId },
-  })
-    .then((existingAttendee) => {
-      if (existingAttendee) {
-        res.status(200).json({ isRegistered: true });
-      } else {
-        res.status(200).json({ isRegistered: false });
-      }
-    })
-    .catch((err) => {
-      res.status(500).json({ message: err.message });
-    });
-};
-
-// EventController.js
-exports.getEventAttendees = (req, res) => {
-  const { eventId } = req.params;
-
-  Attendee.findAll({
-    where: { eventId }
-  })
-    .then((attendees) => {
-      res.status(200).json(attendees);
-    })
-    .catch((err) => {
-      res.status(500).json({ message: err.message });
-    });
+  try {
+    const attendees = await Attendee.findAll({ where: { eventId } });
+    return res.status(200).json(attendees);
+  }
+  catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
 };
 
 
